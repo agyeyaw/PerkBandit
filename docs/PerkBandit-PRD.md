@@ -1,4 +1,37 @@
-# AI Credit Card Assistant — Product Requirements Document
+# PerkBandit — Product Requirements Document
+
+## Brand Identity
+
+**Product Name:** PerkBandit
+
+**Mascot:** Scout (Raccoon)
+
+### Brand Mission
+Help people uncover every reward, credit, perk, and benefit tied to the financial products they already own.
+
+### Brand Personality
+- Clever
+- Resourceful
+- Calm
+- Trustworthy
+- Professional
+
+### Design System
+
+| Purpose | Color |
+|---|---|
+| Background | #111827 (Midnight Slate) |
+| Surface | #1F2937 |
+| Card | #374151 |
+| Primary Accent | #3B82F6 |
+| Success | #A3E635 |
+| Primary Text | #F9FAFB |
+| Secondary Text | #9CA3AF |
+
+Scout is the face of the product and communicates recommendations in a friendly, encouraging tone. The deterministic rules engine performs all financial calculations.
+
+---
+
 
 ## Brand Direction
 
@@ -32,13 +65,13 @@ The credit card assistant is the first product, not the full identity of the com
 **Possible tagline:**  
 *Use every card more intelligently.*
 
-#### 4. PerkPilot
+#### 4. PerkBandit
 **Why it works:** Communicates guidance, rewards, benefits, and assistance. It feels more like an assistant than a tracker.
 
 **Possible tagline:**  
 *Your copilot for rewards and card benefits.*
 
-#### 5. ValuePilot
+#### 5. ValueScout
 **Why it works:** Broad enough to expand into other financial products while still fitting the current app.
 
 **Possible tagline:**  
@@ -50,7 +83,7 @@ The credit card assistant is the first product, not the full identity of the com
 **Possible tagline:**  
 *Never leave rewards unused.*
 
-#### 7. CardPilot
+#### 7. CardScout
 **Why it works:** Directly communicates an assistant that helps users make decisions.
 
 **Possible tagline:**  
@@ -434,13 +467,13 @@ A US credit card holder who:
 
 PerkBandit is more than a financial app—it includes an intelligent raccoon mascot named **Scout**.
 
-Pilot is not a cartoon mascot. Pilot is a premium AI copilot that guides users toward making better financial decisions while adding personality and emotional engagement to the product.
+Scout is not a cartoon mascot. Scout is a resourceful reward hunter that guides users toward making better financial decisions while adding personality and emotional engagement to the product.
 
 The objective is to increase trust, retention, and daily engagement without using manipulative gamification.
 
 ## Brand Personality
 
-Pilot should feel:
+Scout should feel:
 
 - Calm
 - Intelligent
@@ -450,7 +483,7 @@ Pilot should feel:
 - Slightly witty
 - Professional
 
-Pilot should never guilt users or pressure them into opening the app.
+Scout should never guilt users or pressure them into opening the app.
 
 ## Product Role
 
@@ -458,16 +491,16 @@ Scout becomes the primary interface for interacting with PerkBandit.
 
 Examples:
 
-- "Pilot, what's the best card for Costco?"
-- "Pilot, should I keep my Amex Platinum?"
-- "Pilot, how much value have I generated this year?"
-- "Pilot, what should I do today?"
+- "Scout, what's the best card for Costco?"
+- "Scout, should I keep my Amex Platinum?"
+- "Scout, how much value have I generated this year?"
+- "Scout, what should I do today?"
 
-Rather than navigating menus, users should increasingly interact with Pilot through natural language.
+Rather than navigating menus, users should increasingly interact with Scout through natural language.
 
 ## Daily Briefing
 
-The home screen should begin with a personalized briefing from Pilot.
+The home screen should begin with a personalized briefing from Scout.
 
 Example:
 
@@ -487,7 +520,7 @@ The dashboard appears beneath this summary.
 
 ## Emotional States
 
-Pilot should communicate through subtle expressions and animations.
+Scout should communicate through subtle expressions and animations.
 
 Supported emotional states include:
 
@@ -525,7 +558,7 @@ Achievements should reinforce financial progress instead of app engagement.
 
 ## Design Direction
 
-Pilot should be represented as a minimalist AI avatar rather than an animal mascot.
+Scout should be represented as a minimalist raccoon mascot rather than an animal mascot.
 
 Possible visual directions:
 
@@ -795,10 +828,10 @@ Pricing principles:
 
 ## Mobile App
 
-- React Native
-- Expo
+- Swift + SwiftUI
+- Xcode
 - TypeScript
-- Expo Router
+- Xcode Router
 - TanStack Query
 - Zustand
 
@@ -852,7 +885,7 @@ Do not store raw banking passwords directly.
 - RevenueCat
 - Sentry
 - PostHog
-- Expo Notifications or OneSignal
+- Xcode Notifications or OneSignal
 - Feature flags
 - Integration status page
 

@@ -1,6 +1,6 @@
 //
 //  ContentView.swift
-//  PerkPilot
+//  PerkBandit
 //
 //  Created by Yaw Agyemang on 7/26/26.
 //

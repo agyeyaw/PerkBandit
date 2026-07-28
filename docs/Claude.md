@@ -1,10 +1,10 @@
-# PerkPilot — Claude Code Guide
+# PerkBandit — Claude Code Guide
 
 ## Project Overview
 
-PerkPilot is an AI-powered credit card assistant iOS app. Its mission is to help people get maximum value from every financial product they own — starting with credit cards.
+PerkBandit is an AI-powered financial assistant. Its mission is to help people get maximum value from every financial product they own — starting with credit cards.
 
-The app includes an intelligent AI companion named **Pilot** that guides users toward better financial decisions through natural language interaction, daily briefings, and proactive benefit reminders.
+The app includes an intelligent raccoon mascot named **Scout** that guides users toward better financial decisions through natural language interaction, daily briefings, and proactive benefit reminders.
 
 ## Tech Stack
 
@@ -31,10 +31,10 @@ The app includes an intelligent AI companion named **Pilot** that guides users t
 ## Folder Structure
 
 ```
-PerkPilot/
-├── PerkPilot.xcodeproj/          # Xcode project file
-├── PerkPilot/                    # Main app source
-│   ├── PerkPilotApp.swift        # App entry point
+PerkScout/
+├── PerkBandit.xcodeproj/          # Xcode project file
+├── PerkScout/                    # Main app source
+│   ├── PerkBanditApp.swift        # App entry point
 │   ├── ContentView.swift         # Root view
 │   ├── Models/                   # Data models (Card, Benefit, Offer, Recommendation)
 │   ├── Views/                    # SwiftUI views organized by feature
@@ -42,7 +42,7 @@ PerkPilot/
 │   │   ├── Portfolio/
 │   │   ├── Recommendations/
 │   │   ├── Benefits/
-│   │   ├── Pilot/                # AI assistant chat UI
+│   │   ├── Scout/                # AI assistant chat UI
 │   │   └── ROI/
 │   ├── Services/                 # Network, Supabase, Claude API
 │   ├── Engine/                   # Deterministic recommendation engine
@@ -56,7 +56,7 @@ PerkPilot/
 
 ## Build & Run Instructions
 
-1. Open `PerkPilot.xcodeproj` in Xcode
+1. Open `PerkBandit.xcodeproj` in Xcode
 2. Select a simulator (iPhone 15 Pro or later recommended) or your device
 3. Press `Cmd+R` to build and run
 4. No environment variables are required for the initial boilerplate
@@ -73,7 +73,21 @@ PerkPilot/
 
 | File | Purpose |
 |------|---------|
-| `PerkPilot/PerkPilotApp.swift` | App entry point (`@main`) |
-| `PerkPilot/ContentView.swift` | Root SwiftUI view |
+| `PerkScout/PerkBanditApp.swift` | App entry point (`@main`) |
+| `PerkScout/ContentView.swift` | Root SwiftUI view |
 | `docs/PRD.md` | Full product requirements document |
 | `TODO.md` | Phased implementation task list |
+
+
+## Brand Identity
+- Product: PerkBandit
+- Mascot: Scout (Raccoon)
+
+## Color Theme
+- Background #111827
+- Surface #1F2937
+- Card #374151
+- Primary Accent #3B82F6
+- Success #A3E635
+- Primary Text #F9FAFB
+- Secondary Text #9CA3AF

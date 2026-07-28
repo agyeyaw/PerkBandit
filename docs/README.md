@@ -1,14 +1,14 @@
-# PerkPilot
+xe# PerkBandit
 
-**Your copilot for rewards and card benefits.**
+**Your reward hunter for perks, credits, and hidden benefits.**
 
 ---
 
 ## Vision
 
-Help people obtain the maximum value from every financial product they own. PerkPilot starts with credit cards and grows into a broader financial benefit platform.
+Help people obtain the maximum value from every financial product they own. PerkBandit starts with credit cards and grows into a broader financial benefit platform.
 
-The app includes an AI companion named **Pilot** — a calm, intelligent copilot that tells you which card to use, which benefits are expiring, and how much value you've generated — all through natural conversation.
+The app includes an raccoon mascot named **Scout** — a calm, intelligent copilot that tells you which card to use, which benefits are expiring, and how much value you've generated — all through natural conversation.
 
 ---
 
@@ -36,7 +36,7 @@ The app includes an AI companion named **Pilot** — a calm, intelligent copilot
 ### Setup
 
 1. Clone the repository
-2. Open `PerkPilot.xcodeproj` in Xcode
+2. Open `PerkBandit.xcodeproj` in Xcode
 3. Select a simulator or connected device
 4. Press `Cmd+R` to build and run
 

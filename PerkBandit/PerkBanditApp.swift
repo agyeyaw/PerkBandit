@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-enum AppScreen { case splash, onboarding, main }
+enum AppScreen { case splash, onboarding, userOnboarding, main }
 
 @main
 struct PerkBanditApp: App {
@@ -19,9 +19,11 @@ struct PerkBanditApp: App {
             case .splash:
                 SplashScreenView { screen = .onboarding }
             case .onboarding:
-                OnboardingView { screen = .main }
+                OnboardingView { screen = .userOnboarding }
+            case .userOnboarding:
+                UserOnboardingFlowView { screen = .main }
             case .main:
-                ContentView()
+                ContentView { screen = .userOnboarding }
             }
         }
     }

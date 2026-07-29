@@ -10,34 +10,35 @@ import SwiftUI
 struct ContentView: View {
     let onBack: () -> Void
 
-    var body: some View {
-        VStack(spacing: 0) {
-            HStack {
-                Button { onBack() } label: {
-                    ZStack {
-                        Circle()
-                            .fill(Color(.systemGray6))
-                            .frame(width: 40, height: 40)
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                    }
-                }
-                Spacer()
-            }
-            .padding(.horizontal, 20)
-            .padding(.top, 12)
+    private let navy = Color(red: 24/255, green: 32/255, blue: 51/255)
 
-            Spacer()
-            VStack {
-                Image(systemName: "globe")
-                    .imageScale(.large)
-                    .foregroundStyle(.tint)
-                Text("Hello, world!")
-            }
-            .padding()
-            Spacer()
+    var body: some View {
+        TabView {
+            HomeView()
+                .tabItem {
+                    Image(systemName: "house.fill")
+                    Text("Home")
+                }
+
+            CardsTabView()
+                .tabItem {
+                    Image(systemName: "creditcard.fill")
+                    Text("Cards")
+                }
+
+            ProfileTabView()
+                .tabItem {
+                    Image(systemName: "person.fill")
+                    Text("Profile")
+                }
+
+            AskTabView()
+                .tabItem {
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                    Text("Ask")
+                }
         }
+        .tint(navy)
     }
 }
 

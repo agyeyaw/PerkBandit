@@ -9,8 +9,6 @@ struct HomeView: View {
     @State private var cardExpanded = false
     @State private var dragOffset: CGFloat = 0
 
-    private let navy = Color(red: 24/255, green: 32/255, blue: 51/255)
-
     var body: some View {
         GeometryReader { geo in
             let restingY = geo.size.height * 0.50
@@ -19,7 +17,18 @@ struct HomeView: View {
             let currentOffset = max(expandedY, baseOffset + dragOffset)
 
             ZStack(alignment: .top) {
-                navy.ignoresSafeArea()
+                LinearGradient(
+                    stops: [
+                        .init(color: Color(red: 24/255, green: 32/255, blue: 51/255), location: 0.10),
+                        .init(color: Color(red: 29/255, green: 36/255, blue: 51/255), location: 0.18),
+                        .init(color: Color(red: 57/255, green: 69/255, blue: 95/255), location: 0.32),
+                        .init(color: Color(red: 43/255, green: 53/255, blue: 73/255), location: 0.37),
+                        .init(color: Color(red: 24/255, green: 32/255, blue: 51/255), location: 0.42),
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
 
                 VStack(spacing: 0) {
                     // Drag handle

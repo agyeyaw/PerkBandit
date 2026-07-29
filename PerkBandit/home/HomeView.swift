@@ -12,6 +12,17 @@ struct HomeView: View {
 
     private let mockCards = MockCard.samples
 
+    private var greetingText: String {
+        let hour = Calendar.current.component(.hour, from: Date())
+        let timeOfDay: String
+        switch hour {
+        case 5..<12: timeOfDay = "Good Morning"
+        case 12..<17: timeOfDay = "Good Afternoon"
+        default: timeOfDay = "Good Evening"
+        }
+        return "\(timeOfDay), Yaw"
+    }
+
     var body: some View {
         GeometryReader { geo in
             let restingY = geo.size.height * 0.50
@@ -32,6 +43,42 @@ struct HomeView: View {
                     endPoint: .bottom
                 )
                 .ignoresSafeArea()
+
+                // Greeting header
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(greetingText)
+                            .font(.title3.weight(.bold))
+                            .foregroundStyle(.white)
+                        Text("You Have 2 Opportunities")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.7))
+                        Text("Today Worth An Estimated")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.7))
+                    }
+
+                    Spacer()
+
+                    Button(action: {}) {
+                        ZStack(alignment: .topTrailing) {
+                            Image(systemName: "bell.fill")
+                                .font(.title3)
+                                .foregroundStyle(.white)
+                                .padding(8)
+
+                            Text("2")
+                                .font(.caption2.weight(.bold))
+                                .foregroundStyle(.white)
+                                .frame(width: 16, height: 16)
+                                .background(Color.red)
+                                .clipShape(Circle())
+                                .offset(x: 2, y: -2)
+                        }
+                    }
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 10)
 
                 // Credit card carousel
                 VStack {

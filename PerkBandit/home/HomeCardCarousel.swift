@@ -32,7 +32,7 @@ struct HomeCardCarousel: View {
 
             // Card carousel
             ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 16) {
+                HStack(spacing: 32) {
                     ForEach(cards) { card in
                         GeometryReader { proxy in
                             let midX = proxy.frame(in: .global).midX

@@ -8,6 +8,9 @@ import SwiftUI
 struct HomeView: View {
     @State private var cardExpanded = false
     @State private var dragOffset: CGFloat = 0
+    @State private var selectedCardIndex = 0
+
+    private let mockCards = MockCard.samples
 
     var body: some View {
         GeometryReader { geo in
@@ -29,6 +32,13 @@ struct HomeView: View {
                     endPoint: .bottom
                 )
                 .ignoresSafeArea()
+
+                // Credit card carousel
+                VStack {
+                    Spacer()
+                    HomeCardCarousel(cards: mockCards, selectedIndex: $selectedCardIndex)
+                }
+                .frame(height: currentOffset - 40)
 
                 VStack(spacing: 0) {
                     // Drag handle

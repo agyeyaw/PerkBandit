@@ -41,6 +41,11 @@ private let pages: [OnboardingPage] = [
         title: "See how much value you've earned",
         description: "Track the rewards, credit, and savings you've unlocked with PerkBandit."
     ),
+    OnboardingPage(
+        imageName: "AppLogo",
+        title: "Your Data, Your Control",
+        description: "Start manually today and connect accounts whenever you're ready."
+    ),
 ]
 
 struct OnboardingView: View {

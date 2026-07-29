@@ -8,17 +8,40 @@
 import SwiftUI
 
 struct ContentView: View {
+    let onBack: () -> Void
+
+    private let navy = Color(red: 24/255, green: 32/255, blue: 51/255)
+
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+        TabView {
+            HomeView()
+                .tabItem {
+                    Image(systemName: "house.fill")
+                    Text("Home")
+                }
+
+            CardsTabView()
+                .tabItem {
+                    Image(systemName: "creditcard.fill")
+                    Text("Cards")
+                }
+
+            ProfileTabView()
+                .tabItem {
+                    Image(systemName: "person.fill")
+                    Text("Profile")
+                }
+
+            AskTabView()
+                .tabItem {
+                    Image(systemName: "bubble.left.and.bubble.right.fill")
+                    Text("Ask")
+                }
         }
-        .padding()
+        .tint(navy)
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView { }
 }

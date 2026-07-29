@@ -10,6 +10,7 @@ struct HomeView: View {
     @State private var dragOffset: CGFloat = 0
     @State private var selectedCardIndex = 0
     @State private var scrolledToTop = true
+    @State private var showNotifications = false
 
     private let mockCards = MockCard.samples
 
@@ -66,7 +67,11 @@ struct HomeView: View {
 
                         Spacer()
 
-                        Button(action: {}) {
+                        Button {
+                            withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                                showNotifications = true
+                            }
+                        } label: {
                             ZStack(alignment: .topTrailing) {
                                 Image(systemName: "bell.fill")
                                     .font(.title3)
@@ -322,6 +327,13 @@ struct HomeView: View {
                             }
                         }
                 )
+            }
+            .overlay {
+                if showNotifications {
+                    NotificationsView(isPresented: $showNotifications)
+                        .transition(.move(edge: .top))
+                        .zIndex(1)
+                }
             }
         }
     }

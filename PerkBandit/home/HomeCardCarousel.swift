@@ -23,8 +23,7 @@ struct HomeCardCarousel: View {
                 Text("Card Balance")
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.7))
-                Text(selectedCard.balance, format: .currency(code: "USD"))
-                    .font(.title2.weight(.bold))
+                formattedBalance(selectedCard.balance, largeSize: 45, smallSize: 25)
                     .foregroundStyle(.white)
                     .contentTransition(.numericText())
                     .animation(.easeInOut(duration: 0.2), value: selectedIndex)
@@ -109,6 +108,20 @@ struct HomeCardCarousel: View {
             }
         }
     }
+}
+
+private func formattedBalance(_ value: Double, largeSize: CGFloat, smallSize: CGFloat) -> Text {
+    let whole = Int(value)
+    let cents = Int(round((value - Double(whole)) * 100))
+
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    let wholeStr = formatter.string(from: NSNumber(value: whole)) ?? "\(whole)"
+    let centsStr = String(format: "%02d", cents)
+
+    return Text("$").font(.system(size: smallSize, weight: .bold))
+        + Text("\(wholeStr).").font(.system(size: largeSize, weight: .bold))
+        + Text(centsStr).font(.system(size: smallSize, weight: .bold))
 }
 
 #Preview {

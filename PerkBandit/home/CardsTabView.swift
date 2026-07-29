@@ -6,14 +6,34 @@
 import SwiftUI
 
 struct CardsTabView: View {
-    private let navy = Color(red: 24/255, green: 32/255, blue: 51/255)
-
     var body: some View {
-        ZStack {
-            navy.ignoresSafeArea()
-            Text("Cards")
-                .font(.title)
-                .foregroundColor(.white)
+        ZStack(alignment: .topLeading) {
+            Color(red: 202/255, green: 202/255, blue: 202/255)
+                .ignoresSafeArea()
+
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("Manage")
+                        .font(.system(size: 40, weight: .bold))
+                        .foregroundStyle(.black)
+                    Text("Your Cards")
+                        .font(.system(size: 37, weight: .light))
+                        .foregroundStyle(.gray)
+                }
+
+                Spacer()
+
+                VStack(spacing: 4) {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title2)
+                        .foregroundStyle(.white, .black)
+                    Text("Add Card")
+                        .font(.caption)
+                        .foregroundStyle(.black)
+                }
+            }
+            .padding(.horizontal, 20)
+            .padding(.top, 10)
         }
     }
 }

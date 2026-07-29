@@ -17,7 +17,7 @@ struct HomeCardCarousel: View {
     }
 
     var body: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 0) {
             // Balance display
             VStack(spacing: 4) {
                 Text("Card Balance")
@@ -29,6 +29,7 @@ struct HomeCardCarousel: View {
                     .contentTransition(.numericText())
                     .animation(.easeInOut(duration: 0.2), value: selectedIndex)
             }
+            .padding(.bottom, 2)
 
             // Card carousel
             ScrollView(.horizontal, showsIndicators: false) {
@@ -60,6 +61,7 @@ struct HomeCardCarousel: View {
                 .scrollTargetLayout()
                 .padding(.horizontal, (UIScreen.main.bounds.width - 280) / 2)
             }
+            .padding(.top, -50)
             .padding(.bottom, -65)
             .scrollTargetBehavior(.viewAligned)
             .scrollPosition(id: $scrolledID)
@@ -86,6 +88,7 @@ struct HomeCardCarousel: View {
                         .animation(.easeInOut(duration: 0.2), value: selectedIndex)
                 }
             }
+            .padding(.top, 8)
             .accessibilityHidden(true)
         }
         .accessibilityElement(children: .contain)

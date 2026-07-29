@@ -12,6 +12,10 @@ struct HomeView: View {
 
     private let mockCards = MockCard.samples
 
+    private var totalBalance: Double {
+        mockCards.reduce(0) { $0 + $1.balance }
+    }
+
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
         let timeOfDay: String
@@ -28,7 +32,7 @@ struct HomeView: View {
             let restingY = geo.size.height * 0.50
             let expandedY: CGFloat = 100
             let baseOffset = cardExpanded ? expandedY : restingY
-            let currentOffset = max(expandedY, baseOffset + dragOffset)
+            let currentOffset = min(restingY, max(expandedY, baseOffset + dragOffset))
 
             ZStack(alignment: .top) {
                 LinearGradient(
@@ -44,37 +48,48 @@ struct HomeView: View {
                 )
                 .ignoresSafeArea()
 
-                // Greeting header
-                HStack(alignment: .top) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(greetingText)
-                            .font(.title3.weight(.bold))
-                            .foregroundStyle(.white)
-                        Text("You Have 2 Opportunities")
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.7))
-                        Text("Today Worth An Estimated")
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.7))
+                // Greeting header + Total balance
+                VStack(alignment: .leading, spacing: 16) {
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(greetingText)
+                                .font(.title3.weight(.bold))
+                                .foregroundStyle(.white)
+                            Text("You Have 2 Opportunities")
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.7))
+                            Text("Today Worth An Estimated")
+                                .font(.subheadline)
+                                .foregroundStyle(.white.opacity(0.7))
+                        }
+
+                        Spacer()
+
+                        Button(action: {}) {
+                            ZStack(alignment: .topTrailing) {
+                                Image(systemName: "bell.fill")
+                                    .font(.title3)
+                                    .foregroundStyle(.white)
+                                    .padding(8)
+
+                                Text("2")
+                                    .font(.caption2.weight(.bold))
+                                    .foregroundStyle(.white)
+                                    .frame(width: 16, height: 16)
+                                    .background(Color.red)
+                                    .clipShape(Circle())
+                                    .offset(x: 2, y: -2)
+                            }
+                        }
                     }
 
-                    Spacer()
-
-                    Button(action: {}) {
-                        ZStack(alignment: .topTrailing) {
-                            Image(systemName: "bell.fill")
-                                .font(.title3)
-                                .foregroundStyle(.white)
-                                .padding(8)
-
-                            Text("2")
-                                .font(.caption2.weight(.bold))
-                                .foregroundStyle(.white)
-                                .frame(width: 16, height: 16)
-                                .background(Color.red)
-                                .clipShape(Circle())
-                                .offset(x: 2, y: -2)
-                        }
+                    // Total credit balance
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Total Credit Balance")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.7))
+                        formattedBalance(totalBalance, largeSize: 25, smallSize: 20)
+                            .foregroundStyle(.white)
                     }
                 }
                 .padding(.horizontal, 20)
@@ -85,7 +100,7 @@ struct HomeView: View {
                     Spacer()
                     HomeCardCarousel(cards: mockCards, selectedIndex: $selectedCardIndex)
                 }
-                .frame(height: currentOffset - 40)
+                .frame(height: restingY - 40)
 
                 VStack(spacing: 0) {
                     // Drag handle
@@ -133,6 +148,20 @@ struct HomeView: View {
             }
         }
     }
+}
+
+private func formattedBalance(_ value: Double, largeSize: CGFloat, smallSize: CGFloat) -> Text {
+    let whole = Int(value)
+    let cents = Int(round((value - Double(whole)) * 100))
+
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    let wholeStr = formatter.string(from: NSNumber(value: whole)) ?? "\(whole)"
+    let centsStr = String(format: "%02d", cents)
+
+    return Text("$").font(.system(size: smallSize, weight: .bold))
+        + Text("\(wholeStr).").font(.system(size: largeSize, weight: .bold))
+        + Text(centsStr).font(.system(size: smallSize, weight: .bold))
 }
 
 #Preview {

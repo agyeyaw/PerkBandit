@@ -49,7 +49,7 @@ struct OnboardingView: View {
                         Image(pages[i].imageName)
                             .resizable()
                             .scaledToFit()
-                            .frame(width: 180, height: 180)
+                            .frame(width: 80, height: 80)
                         Spacer()
                         Text(pages[i].title)
                             .font(.system(size: 22, weight: .bold))
@@ -70,12 +70,15 @@ struct OnboardingView: View {
             // Page dots — separate row, naturally below all page content
             HStack(spacing: 6) {
                 ForEach(pages.indices, id: \.self) { i in
-                    Circle()
-                        .fill(i == currentPage ? navyColor : Color.gray.opacity(0.35))
-                        .frame(
-                            width: i == currentPage ? 8 : 6,
-                            height: i == currentPage ? 8 : 6
-                        )
+                    if i == currentPage {
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(navyColor)
+                            .frame(width: 24, height: 8)
+                    } else {
+                        Circle()
+                            .fill(Color.gray.opacity(0.35))
+                            .frame(width: 6, height: 6)
+                    }
                 }
             }
             .padding(.vertical, 12)

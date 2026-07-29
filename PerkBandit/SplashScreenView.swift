@@ -17,7 +17,7 @@ struct SplashScreenView: View {
             Image("AppLogo")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 120)
+                .frame(width: 90)
         }
         .onAppear {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {

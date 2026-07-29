@@ -15,28 +15,40 @@ private let goals = [
 
 struct GoalsStepView: View {
     @Binding var selectedGoals: Set<String>
+    let onAdvance: () -> Void
 
     var body: some View {
         VStack(spacing: 0) {
-            Spacer()
-            ZStack {
-                Circle().fill(Color(.systemGray6)).frame(width: 160, height: 160)
-                Image(systemName: "target").font(.system(size: 80)).foregroundColor(navyColor)
-            }
-            Spacer()
-            VStack(spacing: 8) {
-                Text("What's your goal?")
+            VStack(alignment: .leading, spacing: 8) {
+                Text("What brings you to PerkBandit?")
                     .font(.system(size: 24, weight: .bold))
-                    .multilineTextAlignment(.center).padding(.horizontal, 24)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 Text("Tell Scout what matters most.")
                     .font(.system(size: 15)).foregroundColor(.secondary)
-                    .multilineTextAlignment(.center).padding(.horizontal, 32)
+                    .frame(maxWidth: .infinity, alignment: .leading)
             }
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
+            .padding(.horizontal, 20)
+
+            VStack(spacing: 12) {
                 ForEach(goals, id: \.self) { goalChip($0) }
             }
             .padding(.horizontal, 20).padding(.top, 24)
+
             Spacer()
+
+            Button(action: onAdvance) {
+                Text("Continue")
+                    .font(.system(size: 16, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(navyColor)
+                    .foregroundColor(.white)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+            }
+            .disabled(selectedGoals.isEmpty)
+            .opacity(selectedGoals.isEmpty ? 0.4 : 1)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 20)
         }
     }
 
@@ -46,13 +58,19 @@ struct GoalsStepView: View {
         Button {
             if selected { selectedGoals.remove(goal) } else { selectedGoals.insert(goal) }
         } label: {
-            Text(goal)
-                .font(.system(size: 14, weight: .medium)).multilineTextAlignment(.center)
-                .padding(.vertical, 10).padding(.horizontal, 14).frame(maxWidth: .infinity)
-                .background(selected ? navyColor : Color.white)
-                .foregroundColor(selected ? .white : navyColor)
-                .clipShape(RoundedRectangle(cornerRadius: 20))
-                .overlay(RoundedRectangle(cornerRadius: 20).stroke(navyColor, lineWidth: 1.5))
+            HStack(spacing: 10) {
+                Image(systemName: selected ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 18))
+                    .foregroundColor(selected ? .white : navyColor)
+                Text(goal)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(selected ? .white : navyColor)
+                Spacer()
+            }
+            .padding(.vertical, 12).padding(.horizontal, 14).frame(maxWidth: .infinity)
+            .background(selected ? navyColor : Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 20))
+            .overlay(RoundedRectangle(cornerRadius: 20).stroke(navyColor, lineWidth: 1.5))
         }
     }
 }

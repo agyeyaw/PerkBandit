@@ -48,6 +48,7 @@ struct OnboardingView: View {
 
     @State private var currentPage = 0
     @State private var agreedToTerms = false
+    @State private var showLogin = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -134,7 +135,7 @@ struct OnboardingView: View {
 
                 // I Already Have An Account button
                 Button {
-                    onFinished()
+                    showLogin = true
                 } label: {
                     Text("I Already Have An Account")
                         .font(.system(size: 16, weight: .semibold))
@@ -153,5 +154,8 @@ struct OnboardingView: View {
             .ignoresSafeArea(.container, edges: .bottom)
         }
         .background(Color.white.ignoresSafeArea())
+        .sheet(isPresented: $showLogin) {
+            LoginView(onFinished: onFinished)
+        }
     }
 }

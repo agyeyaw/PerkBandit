@@ -18,18 +18,28 @@ struct OnboardingPage {
 private let pages: [OnboardingPage] = [
     OnboardingPage(
         imageName: "AppLogo",
-        title: "Welcome To PerkBandit",
-        description: "Never Miss Another Reward, Credit, Or Perk. Scout Helps You Uncover The Hidden Value In Every Card."
+        title: "Welcome to PerkBandit",
+        description: "Never miss another reward, credit, or perk. Scout helps you uncover the hidden value in every card."
     ),
     OnboardingPage(
-        imageName: "AppLogo",
-        title: "Track Every Perk",
-        description: "Keep tabs on all your credit card benefits in one place. Never let a perk go unused again."
+        imageName: "OnboardingCredit",
+        title: "Never miss another credit",
+        description: "Scout keeps track of every benefit so you don't leave money on the table."
     ),
     OnboardingPage(
-        imageName: "AppLogo",
-        title: "Get Personalized Tips",
-        description: "Scout analyzes your spending and suggests the best cards for every purchase you make."
+        imageName: "OnboardingCards",
+        title: "Always know the best card to use",
+        description: "Earn more points, cashback, and perks with every purchase."
+    ),
+    OnboardingPage(
+        imageName: "OnboardingScout",
+        title: "Scout tells you what to do- not just what you own",
+        description: "Get simple, personalized recommendations based on your cards, spending, and available benefits."
+    ),
+    OnboardingPage(
+        imageName: "OnboardingValue",
+        title: "See how much value you've earned",
+        description: "Track the rewards, credit, and savings you've unlocked with PerkBandit."
     ),
 ]
 

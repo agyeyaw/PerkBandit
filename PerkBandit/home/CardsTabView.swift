@@ -7,9 +7,13 @@ import SwiftUI
 
 struct CardsTabView: View {
     @State private var selectedIndex: Int = 0
+    @State private var dragStartIndex: Int = 0
+    @State private var path = NavigationPath()
     private let cards = MockCard.samples
+    private let dragThreshold: CGFloat = 40
 
     var body: some View {
+        NavigationStack(path: $path) {
         ZStack(alignment: .topLeading) {
             Color(red: 202/255, green: 202/255, blue: 202/255)
                 .ignoresSafeArea()
@@ -64,17 +68,46 @@ struct CardsTabView: View {
                             .zIndex(Double(cards.count - absOffset))
                             .shadow(color: .black.opacity(absOffset == 0 ? 0.3 : 0.1), radius: absOffset == 0 ? 12 : 4, y: absOffset == 0 ? 6 : 2)
                             .onTapGesture {
-                                guard index != selectedIndex else { return }
-                                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
-                                    selectedIndex = index
+                                if index == selectedIndex {
+                                    path.append(card)
+                                } else {
+                                    withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+                                        selectedIndex = index
+                                    }
+                                    dragStartIndex = index
                                 }
                             }
                     }
                 }
                 .frame(maxWidth: .infinity)
+                .gesture(
+                    DragGesture()
+                        .onChanged { value in
+                            let n = cards.count
+                            // Swipe up (negative dy) → increment index, swipe down → decrement
+                            let steps = -Int(value.translation.height / dragThreshold)
+                            let target = ((dragStartIndex + steps) % n + n) % n
+                            if target != selectedIndex {
+                                withAnimation(.spring(response: 0.45, dampingFraction: 0.8)) {
+                                    selectedIndex = target
+                                }
+                            }
+                        }
+                        .onEnded { _ in
+                            dragStartIndex = selectedIndex
+                        }
+                )
 
                 Spacer()
             }
+        }
+        .toolbar(.hidden, for: .navigationBar)
+        .navigationDestination(for: MockCard.self) { card in
+            CardDetailView(card: card)
+        }
+        .navigationDestination(for: String.self) { destination in
+            CardSubPageView(title: destination)
+        }
         }
     }
 }

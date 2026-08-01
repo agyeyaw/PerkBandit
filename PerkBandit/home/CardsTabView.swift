@@ -102,11 +102,17 @@ struct CardsTabView: View {
             }
         }
         .toolbar(.hidden, for: .navigationBar)
+        .toolbar(.visible, for: .tabBar)
         .navigationDestination(for: MockCard.self) { card in
             CardDetailView(card: card)
         }
         .navigationDestination(for: String.self) { destination in
-            CardSubPageView(title: destination)
+            switch destination {
+            case "Benefits": BenefitsPageView()
+            case "Welcome Bonus": WelcomeBonusPageView()
+            case "Value": CardValuePageView()
+            default: CardSubPageView(title: destination)
+            }
         }
         }
     }

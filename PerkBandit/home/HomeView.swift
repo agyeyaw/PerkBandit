@@ -39,49 +39,40 @@ struct HomeView: View {
                         showNotifications: $showNotifications
                     )
 
+                    // Card recommendation on navy
                     if hasCardData {
-                        // Active recommendation sits fully on navy
                         ActiveCardRecommendation()
                             .padding(.horizontal, 20)
-                            .padding(.bottom, 16)
+                            .padding(.bottom, 12)
                     } else {
-                        // No data: card overlaps the boundary
-                        ZStack(alignment: .top) {
-                            UnevenRoundedRectangle(
-                                topLeadingRadius: 32,
-                                topTrailingRadius: 32
-                            )
-                            .fill(Color(.systemGroupedBackground))
-                            .padding(.top, 60)
-
-                            CardRecommendationCard()
-                                .padding(.horizontal, 20)
-                        }
+                        CardRecommendationCard()
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 12)
                     }
 
-                    // White content area
-                    VStack(spacing: 0) {
-                        // Summary cards row
-                        HStack(spacing: 12) {
-                            SummaryCard(
-                                title: "Balance",
-                                value: "$4,280.50",
-                                color: Color(red: 60/255, green: 179/255, blue: 113/255)
-                            )
-                            SummaryCard(
-                                title: "Rewards",
-                                value: "$142.68",
-                                color: Color(red: 255/255, green: 149/255, blue: 0/255)
-                            )
-                            SummaryCard(
-                                title: "Utilization",
-                                value: "24%",
-                                color: PBTheme.accent
-                            )
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 24)
+                    // Summary cards on navy
+                    HStack(spacing: 12) {
+                        SummaryCard(
+                            title: "Balance",
+                            value: "$4,280.50",
+                            color: Color(red: 60/255, green: 179/255, blue: 113/255)
+                        )
+                        SummaryCard(
+                            title: "Rewards",
+                            value: "$142.68",
+                            color: Color(red: 255/255, green: 149/255, blue: 0/255)
+                        )
+                        SummaryCard(
+                            title: "Utilization",
+                            value: "24%",
+                            color: PBTheme.accent
+                        )
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 16)
 
+                    // White content area starts below
+                    VStack(spacing: 0) {
                         // DEBUG: Toggle card data state
                         Toggle(isOn: $hasCardData) {
                             Text("Has Card Data")
@@ -89,15 +80,15 @@ struct HomeView: View {
                                 .foregroundStyle(.gray)
                         }
                         .padding(.horizontal, 20)
-                        .padding(.top, 16)
+                        .padding(.top, 24)
 
                         Spacer()
                             .frame(height: 500)
                     }
                     .background(
                         UnevenRoundedRectangle(
-                            topLeadingRadius: hasCardData ? 32 : 0,
-                            topTrailingRadius: hasCardData ? 32 : 0
+                            topLeadingRadius: 32,
+                            topTrailingRadius: 32
                         )
                         .fill(Color(.systemGroupedBackground))
                     )
@@ -394,11 +385,11 @@ struct SummaryCard: View {
         VStack(spacing: 8) {
             Text(title)
                 .font(.caption)
-                .foregroundStyle(.gray)
+                .foregroundStyle(.white.opacity(0.6))
 
             Text(value)
                 .font(.title3.weight(.bold))
-                .foregroundStyle(.black)
+                .foregroundStyle(.white)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 16)

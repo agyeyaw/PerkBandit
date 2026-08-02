@@ -20,10 +20,14 @@ struct UserOnboardingFlowView: View {
     private var progressIndex: Int {
         switch currentStep {
         case .scoutIntro: return 0
-        case .goals: return 1
-        case .setupMethod, .manualCards, .connectAccounts, .demo: return 2
-        case .notifications: return 3
-        case .completion: return 4
+        case .nameEntry: return 1
+        case .goals: return 2
+        case .setupMethod, .manualCards, .confirmCards, .connectAccounts, .demo: return 3
+        case .welcomeBonus, .benefitStatus: return 4
+        case .recommendationPrefs, .pointValuation: return 5
+        case .notifications: return 6
+        case .dataConfidence, .firstValue: return 7
+        case .completion: return 8
         }
     }
 
@@ -46,7 +50,7 @@ struct UserOnboardingFlowView: View {
 
                 // 5 progress dots
                 HStack(spacing: 6) {
-                    ForEach(0..<5, id: \.self) { i in
+                    ForEach(0..<9, id: \.self) { i in
                         if i == progressIndex {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(navyColor)
@@ -77,7 +81,13 @@ struct UserOnboardingFlowView: View {
     private var currentStepView: some View {
         switch currentStep {
         case .scoutIntro:
-            ScoutStepView(onAdvance: { advance(to: .goals) })
+            ScoutStepView(onAdvance: { advance(to: .nameEntry) })
+
+        case .nameEntry:
+            NameEntryStepView(
+                userName: $state.userName,
+                onAdvance: { advance(to: .goals) }
+            )
 
         case .goals:
             GoalsStepView(
@@ -86,23 +96,42 @@ struct UserOnboardingFlowView: View {
             )
 
         case .setupMethod:
-            SetupMethodStepView(onSelect: { method in
-                state.setupMethod = method
-                switch method {
-                case .manual: advance(to: .manualCards)
-                case .connect: advance(to: .connectAccounts)
-                case .demo: advance(to: .demo)
+            ManualExplanationStepView(
+                onContinueManually: {
+                    state.setupMethod = .manual
+                    advance(to: .manualCards)
+                },
+                onConnectAccount: {
+                    state.setupMethod = .connect
+                    advance(to: .connectAccounts)
+                },
+                onExploreSample: {
+                    state.setupMethod = .demo
+                    advance(to: .demo)
                 }
-            })
+            )
 
         case .manualCards:
             ManualCardSetupView(
                 selectedCards: $state.selectedCards,
-                onAdvance: { advance(to: .notifications) }
+                onAdvance: {
+                    if !state.selectedCards.isEmpty {
+                        advance(to: .confirmCards)
+                    } else {
+                        advance(to: .notifications)
+                    }
+                }
+            )
+
+        case .confirmCards:
+            ConfirmCardsStepView(
+                selectedCards: $state.selectedCards,
+                onAdvance: { advanceAfterCardSetup() },
+                onAddMore: { goBack() }
             )
 
         case .connectAccounts:
-            ConnectAccountsView(onAdvance: { advance(to: .notifications) })
+            ConnectAccountsView(onAdvance: { advance(to: .benefitStatus) })
 
         case .demo:
             DemoPortfolioView(
@@ -111,7 +140,6 @@ struct UserOnboardingFlowView: View {
                     advance(to: .notifications)
                 },
                 onChooseAnother: {
-                    // Pop back to setupMethod, removing any branch screens on top
                     if let idx = stepStack.lastIndex(of: .setupMethod) {
                         withAnimation { stepStack = Array(stepStack.prefix(through: idx)) }
                     } else {
@@ -120,17 +148,66 @@ struct UserOnboardingFlowView: View {
                 }
             )
 
+        case .welcomeBonus:
+            WelcomeBonusStepView(
+                selectedCards: $state.selectedCards,
+                cardBonusStatuses: $state.cardBonusStatuses,
+                cardBonusDetails: $state.cardBonusDetails,
+                onAdvance: { advance(to: .benefitStatus) }
+            )
+
+        case .benefitStatus:
+            BenefitStatusStepView(
+                setupMethod: state.setupMethod,
+                benefitStatuses: $state.benefitStatuses,
+                onAdvance: { advance(to: .recommendationPrefs) }
+            )
+
+        case .recommendationPrefs:
+            RecommendationPrefsStepView(
+                selectedGoals: state.selectedGoals,
+                recommendationPrefs: $state.recommendationPrefs,
+                onAdvance: { advance(to: .notifications) },
+                onAdvanced: { advance(to: .pointValuation) }
+            )
+
+        case .pointValuation:
+            PointValuationStepView(
+                pointValuation: $state.pointValuation,
+                onAdvance: { advance(to: .notifications) }
+            )
+
         case .notifications:
             NotificationsStepView(onAdvance: { granted in
                 state.notificationsEnabled = granted
-                advance(to: .completion)
+                advance(to: .dataConfidence)
             })
+
+        case .dataConfidence:
+            DataConfidenceStepView(onAdvance: {
+                advance(to: .firstValue)
+            })
+
+        case .firstValue:
+            FirstValuePreviewStepView(
+                selectedCards: state.selectedCards,
+                setupMethod: state.setupMethod,
+                onAdvance: { advance(to: .completion) }
+            )
 
         case .completion:
             CompletionStepView(onAdvance: {
                 OnboardingPersistence.markCompleted()
                 onFinished()
             })
+        }
+    }
+
+    private func advanceAfterCardSetup() {
+        if state.selectedGoals.contains("Complete welcome bonuses") {
+            advance(to: .welcomeBonus)
+        } else {
+            advance(to: .benefitStatus)
         }
     }
 

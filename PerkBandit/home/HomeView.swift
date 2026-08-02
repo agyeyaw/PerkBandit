@@ -50,26 +50,6 @@ struct HomeView: View {
                             .padding(.bottom, 12)
                     }
 
-                    // Summary cards on navy
-                    HStack(spacing: 12) {
-                        SummaryCard(
-                            title: "Balance",
-                            value: "$4,280.50",
-                            color: Color(red: 60/255, green: 179/255, blue: 113/255)
-                        )
-                        SummaryCard(
-                            title: "Rewards",
-                            value: "$142.68",
-                            color: Color(red: 255/255, green: 149/255, blue: 0/255)
-                        )
-                        SummaryCard(
-                            title: "Utilization",
-                            value: "24%",
-                            color: PBTheme.accent
-                        )
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 16)
 
                     // White content area starts below
                     VStack(alignment: .leading, spacing: 20) {
@@ -150,9 +130,9 @@ struct HomeView: View {
                             )
                         }
 
-                        // Today's Opportunities header
+                        // More Opportunities header
                         HStack {
-                            Text("Today's Opportunities")
+                            Text("More Opportunities")
                                 .font(.title3.weight(.bold))
                             Spacer()
                             Button {
@@ -167,20 +147,9 @@ struct HomeView: View {
                         // Opportunity rows
                         VStack(spacing: 0) {
                             OpportunityRow(
-                                icon: "creditcard.fill",
-                                iconColor: .orange,
-                                title: "Use your Amex Gold for lunch",
-                                subtitle: "Grubhub · Restaurant",
-                                trailingText: "+$6.20",
-                                trailingColor: PBTheme.positive
-                            )
-
-                            Divider().padding(.leading, 52)
-
-                            OpportunityRow(
                                 icon: "car.fill",
                                 iconColor: .primary,
-                                title: "Uber Cash credit expires tomorrow",
+                                title: "Uber Cash expires tomorrow",
                                 subtitle: "$10 remaining",
                                 trailingText: "Expiring",
                                 trailingColor: .orange
@@ -195,6 +164,17 @@ struct HomeView: View {
                                 subtitle: "Q2 category · Grocery",
                                 trailingText: "+$12/mo",
                                 trailingColor: PBTheme.positive
+                            )
+
+                            Divider().padding(.leading, 52)
+
+                            OpportunityRow(
+                                icon: "dollarsign.circle.fill",
+                                iconColor: .red,
+                                title: "Review annual fee",
+                                subtitle: "Sapphire Reserve · $550",
+                                trailingText: "Due soon",
+                                trailingColor: .secondary
                             )
                         }
                         .padding(.vertical, 4)
@@ -247,10 +227,11 @@ struct HomeView: View {
                     .padding(.top, 24)
                     .background(
                         UnevenRoundedRectangle(
-                            topLeadingRadius: 32,
-                            topTrailingRadius: 32
+                            topLeadingRadius: 24,
+                            topTrailingRadius: 24
                         )
-                        .fill(Color(.systemGroupedBackground))
+                        .fill(Color(red: 245/255, green: 246/255, blue: 250/255))
+                        .shadow(color: .black.opacity(0.15), radius: 12, y: -4)
                     )
                 }
             }
@@ -539,31 +520,6 @@ struct ActiveCardRecommendation: View {
     }
 }
 
-// MARK: - Summary Card
-
-struct SummaryCard: View {
-    let title: String
-    let value: String
-    let color: Color
-
-    var body: some View {
-        VStack(spacing: 8) {
-            Text(title)
-                .font(.caption)
-                .foregroundStyle(.white.opacity(0.6))
-
-            Text(value)
-                .font(.title3.weight(.bold))
-                .foregroundStyle(.white)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(color.opacity(0.12))
-        )
-    }
-}
 
 // MARK: - Opportunity Row
 
@@ -589,7 +545,7 @@ struct OpportunityRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(title)
                     .font(.subheadline.weight(.medium))
-                    .lineLimit(1)
+                    .lineLimit(2)
                 Text(subtitle)
                     .font(.caption)
                     .foregroundStyle(.secondary)

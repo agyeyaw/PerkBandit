@@ -6,8 +6,15 @@
 import SwiftUI
 
 struct HomeView: View {
+    var onViewCards: () -> Void = {}
+
+    @EnvironmentObject var cardStore: CardStore
     @State private var showNotifications = false
-    @State private var hasCardData = false
+    @State private var hasCardDataOverride: Bool? = nil
+
+    private var hasCardData: Bool {
+        hasCardDataOverride ?? cardStore.isUserSelected
+    }
 
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
@@ -45,7 +52,7 @@ struct HomeView: View {
                             .padding(.horizontal, 20)
                             .padding(.bottom, 12)
                     } else {
-                        CardRecommendationCard()
+                        CardRecommendationCard(onViewCards: onViewCards)
                             .padding(.horizontal, 20)
                             .padding(.bottom, 12)
                     }
@@ -215,8 +222,11 @@ struct HomeView: View {
                                 .fill(Color(.systemBackground))
                         )
 
-                        // DEBUG: Toggle card data state
-                        Toggle(isOn: $hasCardData) {
+                        // DEBUG: Toggle card data state override
+                        Toggle(isOn: Binding(
+                            get: { hasCardData },
+                            set: { hasCardDataOverride = $0 }
+                        )) {
                             Text("Has Card Data")
                                 .font(.caption.weight(.medium))
                                 .foregroundStyle(.gray)
@@ -332,6 +342,8 @@ struct HomeHeroView: View {
 // MARK: - Card Recommendation Component
 
 struct CardRecommendationCard: View {
+    var onViewCards: () -> Void = {}
+
     var body: some View {
         HStack(spacing: 16) {
             // Card illustration
@@ -388,7 +400,7 @@ struct CardRecommendationCard: View {
                     }
 
                     Button {
-                        // View Cards action
+                        onViewCards()
                     } label: {
                         HStack(spacing: 2) {
                             Text("View Cards")
@@ -564,4 +576,5 @@ struct OpportunityRow: View {
 
 #Preview {
     HomeView()
+        .environmentObject(CardStore())
 }

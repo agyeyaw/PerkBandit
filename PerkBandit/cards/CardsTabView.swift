@@ -6,11 +6,13 @@
 import SwiftUI
 
 struct CardsTabView: View {
+    @EnvironmentObject var cardStore: CardStore
     @State private var selectedIndex: Int = 0
     @State private var dragStartIndex: Int = 0
     @State private var path = NavigationPath()
-    private let cards = MockCard.samples
     private let dragThreshold: CGFloat = 40
+
+    private var cards: [MockCard] { cardStore.cards }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -120,4 +122,5 @@ struct CardsTabView: View {
 
 #Preview {
     CardsTabView()
+        .environmentObject(CardStore())
 }

@@ -12,6 +12,7 @@ private let navyColor = Color(red: 24/255, green: 32/255, blue: 51/255)
 struct UserOnboardingFlowView: View {
     let onFinished: () -> Void
 
+    @EnvironmentObject var cardStore: CardStore
     @StateObject private var state = OnboardingState()
     @State private var stepStack: [UserOnboardingStep] = [.scoutIntro]
 
@@ -197,7 +198,8 @@ struct UserOnboardingFlowView: View {
 
         case .completion:
             CompletionStepView(onAdvance: {
-                OnboardingPersistence.markCompleted()
+                OnboardingPersistence.markCompleted(selectedCards: state.selectedCards)
+                cardStore.reload()
                 onFinished()
             })
         }

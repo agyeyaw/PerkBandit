@@ -67,12 +67,14 @@ let mockCardCatalog: [CreditCard] = [
 ]
 
 enum OnboardingPersistence {
-    static func markCompleted() {
+    static func markCompleted(selectedCards: [String] = []) {
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+        UserDefaults.standard.set(selectedCards, forKey: "userSelectedCardIDs")
     }
     #if DEBUG
     static func reset() {
         UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
+        UserDefaults.standard.removeObject(forKey: "userSelectedCardIDs")
     }
     #endif
 }

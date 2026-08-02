@@ -12,6 +12,7 @@ enum AppScreen { case splash, onboarding, userOnboarding, main }
 @main
 struct PerkBanditApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @StateObject private var cardStore = CardStore()
     @State private var screen: AppScreen = .splash
 
     var body: some Scene {
@@ -20,10 +21,12 @@ struct PerkBanditApp: App {
                 ContentView {
                     #if DEBUG
                     OnboardingPersistence.reset()
+                    cardStore.reload()
                     #endif
                     hasCompletedOnboarding = false
                     screen = .splash
                 }
+                .environmentObject(cardStore)
             } else {
                 switch screen {
                 case .splash:
@@ -32,8 +35,10 @@ struct PerkBanditApp: App {
                     OnboardingView { screen = .userOnboarding }
                 case .userOnboarding:
                     UserOnboardingFlowView { screen = .main }
+                        .environmentObject(cardStore)
                 case .main:
                     ContentView { screen = .userOnboarding }
+                        .environmentObject(cardStore)
                 }
             }
         }

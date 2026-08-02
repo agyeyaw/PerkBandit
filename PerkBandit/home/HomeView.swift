@@ -72,19 +72,179 @@ struct HomeView: View {
                     .padding(.bottom, 16)
 
                     // White content area starts below
-                    VStack(spacing: 0) {
+                    VStack(alignment: .leading, spacing: 20) {
+                        // Credits expiring + Bonus progress cards
+                        HStack(spacing: 12) {
+                            // Credits expiring
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "clock.arrow.circlepath")
+                                        .font(.caption)
+                                        .foregroundStyle(.orange)
+                                    Text("Credits expiring")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Text("Uber Cash")
+                                    .font(.subheadline.weight(.bold))
+                                Text("expires tomorrow")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+
+                                HStack(spacing: 4) {
+                                    Image(systemName: "exclamationmark.triangle.fill")
+                                        .font(.caption2)
+                                        .foregroundStyle(.red)
+                                    Text("$10 at risk")
+                                        .font(.caption.weight(.medium))
+                                        .foregroundStyle(.red)
+                                }
+                            }
+                            .padding(14)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .fill(Color(.systemBackground))
+                            )
+
+                            // Bonus progress
+                            VStack(alignment: .leading, spacing: 8) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "star.circle.fill")
+                                        .font(.caption)
+                                        .foregroundStyle(PBTheme.accent)
+                                    Text("Bonus progress")
+                                        .font(.caption.weight(.semibold))
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Text("Sapphire bonus")
+                                    .font(.subheadline.weight(.bold))
+                                Text("$342 left")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+
+                                // Progress bar
+                                GeometryReader { barGeo in
+                                    ZStack(alignment: .leading) {
+                                        Capsule()
+                                            .fill(Color(.systemGray5))
+                                            .frame(height: 6)
+                                        Capsule()
+                                            .fill(PBTheme.accent)
+                                            .frame(width: barGeo.size.width * 0.45, height: 6)
+                                    }
+                                }
+                                .frame(height: 6)
+
+                                Text("$1,808 / $4,000")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                            .padding(14)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(
+                                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                    .fill(Color(.systemBackground))
+                            )
+                        }
+
+                        // Today's Opportunities header
+                        HStack {
+                            Text("Today's Opportunities")
+                                .font(.title3.weight(.bold))
+                            Spacer()
+                            Button {
+                                // See all action
+                            } label: {
+                                Text("See all")
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(PBTheme.accent)
+                            }
+                        }
+
+                        // Opportunity rows
+                        VStack(spacing: 0) {
+                            OpportunityRow(
+                                icon: "creditcard.fill",
+                                iconColor: .orange,
+                                title: "Use your Amex Gold for lunch",
+                                subtitle: "Grubhub · Restaurant",
+                                trailingText: "+$6.20",
+                                trailingColor: PBTheme.positive
+                            )
+
+                            Divider().padding(.leading, 52)
+
+                            OpportunityRow(
+                                icon: "car.fill",
+                                iconColor: .primary,
+                                title: "Uber Cash credit expires tomorrow",
+                                subtitle: "$10 remaining",
+                                trailingText: "Expiring",
+                                trailingColor: .orange
+                            )
+
+                            Divider().padding(.leading, 52)
+
+                            OpportunityRow(
+                                icon: "percent",
+                                iconColor: PBTheme.accent,
+                                title: "Activate Chase 5% category",
+                                subtitle: "Q2 category · Grocery",
+                                trailingText: "+$12/mo",
+                                trailingColor: PBTheme.positive
+                            )
+                        }
+                        .padding(.vertical, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color(.systemBackground))
+                        )
+
+                        // Value captured
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Value captured")
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(.secondary)
+                                HStack(alignment: .firstTextBaseline, spacing: 4) {
+                                    Text("$684.32")
+                                        .font(.title2.weight(.bold))
+                                    Text("this year")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                            }
+
+                            Spacer()
+
+                            VStack(alignment: .trailing, spacing: 4) {
+                                Text("+$49.29")
+                                    .font(.title3.weight(.bold))
+                                    .foregroundStyle(PBTheme.positive)
+                                Text("this month")
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(16)
+                        .background(
+                            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                                .fill(Color(.systemBackground))
+                        )
+
                         // DEBUG: Toggle card data state
                         Toggle(isOn: $hasCardData) {
                             Text("Has Card Data")
                                 .font(.caption.weight(.medium))
                                 .foregroundStyle(.gray)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 24)
-
-                        Spacer()
-                            .frame(height: 500)
+                        .padding(.bottom, 40)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 24)
                     .background(
                         UnevenRoundedRectangle(
                             topLeadingRadius: 32,
@@ -115,7 +275,7 @@ struct HomeHeroView: View {
             // Greeting, notification bell, and Scout
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Hi, Yaw")
+                    Text("Hi, Justin")
                         .font(.title3)
                         .foregroundStyle(.white.opacity(0.6))
 
@@ -128,7 +288,12 @@ struct HomeHeroView: View {
                     + Text("2")
                         .foregroundStyle(PBTheme.accent)
                         .fontWeight(.semibold)
-                    + Text(" opportunities worth an estimated value today.")
+                    + Text(" opportunities worth an estimated ")
+                        .foregroundStyle(.white.opacity(0.6))
+                    + Text("$18.92")
+                        .foregroundStyle(PBTheme.accent)
+                        .fontWeight(.semibold)
+                    + Text(" today.")
                         .foregroundStyle(.white.opacity(0.6)))
                         .font(.subheadline)
                 }
@@ -220,7 +385,7 @@ struct CardRecommendationCard: View {
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(.white)
 
-                Text("Scout needs a recent transaction, merchant, or more card data to recommend your best card.")
+                Text("Tell Scout where you're shopping to find the best card. You can also add or update your cards for more personalized recommendations.")
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.5))
                     .lineLimit(3)
@@ -397,6 +562,47 @@ struct SummaryCard: View {
             RoundedRectangle(cornerRadius: 16, style: .continuous)
                 .fill(color.opacity(0.12))
         )
+    }
+}
+
+// MARK: - Opportunity Row
+
+struct OpportunityRow: View {
+    let icon: String
+    let iconColor: Color
+    let title: String
+    let subtitle: String
+    let trailingText: String
+    let trailingColor: Color
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(iconColor.opacity(0.12))
+                .frame(width: 36, height: 36)
+                .overlay(
+                    Image(systemName: icon)
+                        .font(.caption)
+                        .foregroundStyle(iconColor)
+                )
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.medium))
+                    .lineLimit(1)
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Text(trailingText)
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(trailingColor)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
     }
 }
 

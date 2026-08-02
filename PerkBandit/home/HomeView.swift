@@ -39,21 +39,21 @@ struct HomeView: View {
                         showNotifications: $showNotifications
                     )
 
-                    // Card recommendation overlaps the boundary
-                    ZStack(alignment: .top) {
-                        // White card panel with curved top corners
-                        UnevenRoundedRectangle(
-                            topLeadingRadius: 32,
-                            topTrailingRadius: 32
-                        )
-                        .fill(Color(.systemGroupedBackground))
-                        .padding(.top, hasCardData ? 80 : 60)
+                    if hasCardData {
+                        // Active recommendation sits fully on navy
+                        ActiveCardRecommendation()
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 16)
+                    } else {
+                        // No data: card overlaps the boundary
+                        ZStack(alignment: .top) {
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 32,
+                                topTrailingRadius: 32
+                            )
+                            .fill(Color(.systemGroupedBackground))
+                            .padding(.top, 60)
 
-                        // Card recommendation
-                        if hasCardData {
-                            ActiveCardRecommendation()
-                                .padding(.horizontal, 20)
-                        } else {
                             CardRecommendationCard()
                                 .padding(.horizontal, 20)
                         }
@@ -61,6 +61,27 @@ struct HomeView: View {
 
                     // White content area
                     VStack(spacing: 0) {
+                        // Summary cards row
+                        HStack(spacing: 12) {
+                            SummaryCard(
+                                title: "Balance",
+                                value: "$4,280.50",
+                                color: Color(red: 60/255, green: 179/255, blue: 113/255)
+                            )
+                            SummaryCard(
+                                title: "Rewards",
+                                value: "$142.68",
+                                color: Color(red: 255/255, green: 149/255, blue: 0/255)
+                            )
+                            SummaryCard(
+                                title: "Utilization",
+                                value: "24%",
+                                color: PBTheme.accent
+                            )
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 24)
+
                         // DEBUG: Toggle card data state
                         Toggle(isOn: $hasCardData) {
                             Text("Has Card Data")
@@ -73,7 +94,13 @@ struct HomeView: View {
                         Spacer()
                             .frame(height: 500)
                     }
-                    .background(Color(.systemGroupedBackground))
+                    .background(
+                        UnevenRoundedRectangle(
+                            topLeadingRadius: hasCardData ? 32 : 0,
+                            topTrailingRadius: hasCardData ? 32 : 0
+                        )
+                        .fill(Color(.systemGroupedBackground))
+                    )
                 }
             }
         }
@@ -352,6 +379,32 @@ struct ActiveCardRecommendation: View {
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
                 .fill(Color(red: 24/255, green: 30/255, blue: 52/255))
+        )
+    }
+}
+
+// MARK: - Summary Card
+
+struct SummaryCard: View {
+    let title: String
+    let value: String
+    let color: Color
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Text(title)
+                .font(.caption)
+                .foregroundStyle(.gray)
+
+            Text(value)
+                .font(.title3.weight(.bold))
+                .foregroundStyle(.black)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(color.opacity(0.12))
         )
     }
 }

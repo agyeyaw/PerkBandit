@@ -19,43 +19,61 @@ struct HomeView: View {
     }
 
     var body: some View {
-        ZStack(alignment: .top) {
-            Color(.systemGroupedBackground)
-                .ignoresSafeArea()
-
-            // Navy fill for status bar area
-            Color(red: 12/255, green: 16/255, blue: 32/255)
-                .frame(height: 0)
-                .background(Color(red: 12/255, green: 16/255, blue: 32/255))
-                .ignoresSafeArea(edges: .top)
+        ZStack {
+            // Navy blue full page background
+            LinearGradient(
+                colors: [
+                    Color(red: 12/255, green: 16/255, blue: 32/255),
+                    Color(red: 20/255, green: 26/255, blue: 48/255),
+                ],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
 
             ScrollView {
                 VStack(spacing: 0) {
-                    // Hero content (greeting, scout, etc.)
+                    // Greeting, notification bell, and Scout (on navy background)
                     HomeHeroView(
                         greetingText: greetingText,
-                        showNotifications: $showNotifications,
-                        hasCardData: hasCardData
+                        showNotifications: $showNotifications
                     )
 
-                    // Card recommendation overlaps the hero (only when no card data)
-                    if !hasCardData {
-                        CardRecommendationCard()
-                            .padding(.horizontal, 20)
-                            .padding(.top, 12)
-                            .offset(y: -16)
+                    // Card recommendation overlaps the boundary
+                    ZStack(alignment: .top) {
+                        // White card panel with curved top corners
+                        UnevenRoundedRectangle(
+                            topLeadingRadius: 32,
+                            topTrailingRadius: 32
+                        )
+                        .fill(Color(.systemGroupedBackground))
+                        .padding(.top, hasCardData ? 80 : 60)
+
+                        // Card recommendation
+                        if hasCardData {
+                            ActiveCardRecommendation()
+                                .padding(.horizontal, 20)
+                        } else {
+                            CardRecommendationCard()
+                                .padding(.horizontal, 20)
+                        }
                     }
 
-                    // DEBUG: Toggle card data state
-                    Toggle(isOn: $hasCardData) {
-                        Text("Has Card Data")
-                            .font(.caption.weight(.medium))
-                            .foregroundStyle(.gray)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 8)
+                    // White content area
+                    VStack(spacing: 0) {
+                        // DEBUG: Toggle card data state
+                        Toggle(isOn: $hasCardData) {
+                            Text("Has Card Data")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(.gray)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 16)
 
-                    Spacer()
+                        Spacer()
+                            .frame(height: 500)
+                    }
+                    .background(Color(.systemGroupedBackground))
                 }
             }
         }
@@ -74,7 +92,6 @@ struct HomeView: View {
 struct HomeHeroView: View {
     let greetingText: String
     @Binding var showNotifications: Bool
-    var hasCardData: Bool = false
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Greeting, notification bell, and Scout
@@ -143,32 +160,8 @@ struct HomeHeroView: View {
             }
             .padding(.horizontal, 20)
             .padding(.top, 12)
-
-            if hasCardData {
-                ActiveCardRecommendation()
-                    .padding(.horizontal, 20)
-                    .padding(.top, 16)
-                    .padding(.bottom, 20)
-            }
+            .padding(.bottom, 16)
         }
-        .background(
-            UnevenRoundedRectangle(
-                bottomLeadingRadius: 32,
-                bottomTrailingRadius: 32
-            )
-            .fill(
-                LinearGradient(
-                    colors: [
-                        Color(red: 12/255, green: 16/255, blue: 32/255),
-                        Color(red: 20/255, green: 26/255, blue: 48/255),
-                    ],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
-            .padding(.bottom, hasCardData ? 0 : -80)
-            .ignoresSafeArea(edges: .top)
-        )
     }
 }
 

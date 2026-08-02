@@ -8,6 +8,7 @@ import SwiftUI
 struct NotificationsView: View {
     @Binding var isPresented: Bool
     @State private var dragOffset: CGFloat = 0
+    @State private var isDismissing = false
 
     private let dismissThreshold: CGFloat = 150
 
@@ -30,9 +31,7 @@ struct NotificationsView: View {
                 Spacer()
 
                 Button {
-                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                        isPresented = false
-                    }
+                    dismiss()
                 } label: {
                     Image(systemName: "xmark")
                         .font(.body.weight(.semibold))
@@ -85,23 +84,32 @@ struct NotificationsView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color(red: 24/255, green: 32/255, blue: 51/255).ignoresSafeArea())
-        .offset(y: max(0, dragOffset))
+        .offset(y: isDismissing ? dragOffset : max(0, dragOffset))
         .gesture(
             DragGesture()
                 .onChanged { value in
-                    dragOffset = value.translation.height
+                    if !isDismissing {
+                        dragOffset = value.translation.height
+                    }
                 }
                 .onEnded { value in
-                    if dragOffset > dismissThreshold || value.predictedEndTranslation.height > 300 {
-                        withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                            isPresented = false
-                        }
-                    } else {
+                    if !isDismissing && (dragOffset > dismissThreshold || value.predictedEndTranslation.height > 300) {
+                        dismiss()
+                    } else if !isDismissing {
                         withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
                             dragOffset = 0
                         }
                     }
                 }
         )
+    }
+
+    private func dismiss() {
+        isDismissing = true
+        withAnimation(.spring(response: 0.35, dampingFraction: 0.9)) {
+            dragOffset = -UIScreen.main.bounds.height
+        } completion: {
+            isPresented = false
+        }
     }
 }

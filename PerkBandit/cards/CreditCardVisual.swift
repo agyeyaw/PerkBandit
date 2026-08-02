@@ -5,7 +5,14 @@
 
 import SwiftUI
 
-struct MockCard: Identifiable {
+struct MockCard: Identifiable, Hashable {
+    static func == (lhs: MockCard, rhs: MockCard) -> Bool {
+        lhs.id == rhs.id
+    }
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+
     let id: UUID
     let name: String
     let issuer: String
@@ -45,6 +52,46 @@ struct MockCard: Identifiable {
             networkMark: "AMEX",
             accentColor: Color.orange,
             gradientColors: [Color(red: 0.28, green: 0.25, blue: 0.22), Color(red: 0.15, green: 0.14, blue: 0.12)]
+        ),
+        MockCard(
+            id: UUID(),
+            name: "Platinum Edge",
+            issuer: "Apex Credit",
+            lastFour: "9204",
+            balance: 3415.60,
+            networkMark: "VISA",
+            accentColor: Color.purple,
+            gradientColors: [Color(red: 0.30, green: 0.10, blue: 0.35), Color(red: 0.18, green: 0.05, blue: 0.22)]
+        ),
+        MockCard(
+            id: UUID(),
+            name: "Everyday Card",
+            issuer: "Pine Street Bank",
+            lastFour: "6617",
+            balance: 420.15,
+            networkMark: "MC",
+            accentColor: Color.green,
+            gradientColors: [Color(red: 0.08, green: 0.32, blue: 0.18), Color(red: 0.04, green: 0.20, blue: 0.10)]
+        ),
+        MockCard(
+            id: UUID(),
+            name: "Student Rewards",
+            issuer: "Nova Financial",
+            lastFour: "1088",
+            balance: 156.30,
+            networkMark: "VISA",
+            accentColor: Color.cyan,
+            gradientColors: [Color(red: 0.05, green: 0.25, blue: 0.40), Color(red: 0.02, green: 0.15, blue: 0.25)]
+        ),
+        MockCard(
+            id: UUID(),
+            name: "Business Pro",
+            issuer: "Meridian Bank",
+            lastFour: "5432",
+            balance: 8750.00,
+            networkMark: "AMEX",
+            accentColor: Color.red,
+            gradientColors: [Color(red: 0.35, green: 0.08, blue: 0.08), Color(red: 0.22, green: 0.04, blue: 0.04)]
         ),
     ]
 }

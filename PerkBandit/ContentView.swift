@@ -26,10 +26,10 @@ struct ContentView: View {
                     Text("Cards")
                 }
 
-            ProfileTabView()
+            InsightTabView(onRestartOnboarding: onBack)
                 .tabItem {
-                    Image(systemName: "person.fill")
-                    Text("Profile")
+                    Image(systemName: "chart.bar.fill")
+                    Text("Insight")
                 }
 
             AskTabView()

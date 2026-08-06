@@ -7,14 +7,32 @@ import Foundation
 import Combine
 
 class CardStore: ObservableObject {
-    @Published var cards: [MockCard]
+    @Published var cards: [CreditCard]
     @Published var isUserSelected: Bool
 
+    private static let idMigrations: [String: String] = [
+        "citi-premier": "citi-strata-premier",
+    ]
+
     init() {
-        let savedIDs = UserDefaults.standard.stringArray(forKey: "userSelectedCardIDs") ?? []
-        let mapped = MockCard.forCatalogIDs(savedIDs)
+        var savedIDs = UserDefaults.standard.stringArray(forKey: "userSelectedCardIDs") ?? []
+
+        // Migrate old IDs
+        var didMigrate = false
+        savedIDs = savedIDs.map { id in
+            if let newID = Self.idMigrations[id] {
+                didMigrate = true
+                return newID
+            }
+            return id
+        }
+        if didMigrate {
+            UserDefaults.standard.set(savedIDs, forKey: "userSelectedCardIDs")
+        }
+
+        let mapped = savedIDs.compactMap { catalogCard(for: $0) }
         if mapped.isEmpty {
-            cards = MockCard.samples
+            cards = Array(cardCatalog.prefix(5))
             isUserSelected = false
         } else {
             cards = mapped
@@ -24,9 +42,9 @@ class CardStore: ObservableObject {
 
     func reload() {
         let savedIDs = UserDefaults.standard.stringArray(forKey: "userSelectedCardIDs") ?? []
-        let mapped = MockCard.forCatalogIDs(savedIDs)
+        let mapped = savedIDs.compactMap { catalogCard(for: $0) }
         if mapped.isEmpty {
-            cards = MockCard.samples
+            cards = Array(cardCatalog.prefix(5))
             isUserSelected = false
         } else {
             cards = mapped

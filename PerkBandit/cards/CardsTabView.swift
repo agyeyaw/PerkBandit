@@ -12,7 +12,7 @@ struct CardsTabView: View {
     @State private var path = NavigationPath()
     private let dragThreshold: CGFloat = 40
 
-    private var cards: [MockCard] { cardStore.cards }
+    private var cards: [CreditCard] { cardStore.cards }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -105,7 +105,7 @@ struct CardsTabView: View {
         }
         .toolbar(.hidden, for: .navigationBar)
         .toolbar(.visible, for: .tabBar)
-        .navigationDestination(for: MockCard.self) { card in
+        .navigationDestination(for: CreditCard.self) { card in
             CardDetailView(card: card)
         }
         .navigationDestination(for: String.self) { destination in

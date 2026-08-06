@@ -47,25 +47,6 @@ class OnboardingState: ObservableObject {
     @Published var pointValuation: String = "perkbandit"           // "perkbandit" / "cashback" / "custom"
 }
 
-struct CreditCard: Identifiable {
-    let id: String
-    let name: String
-    let issuer: String
-}
-
-let mockCardCatalog: [CreditCard] = [
-    CreditCard(id: "chase-sapphire-preferred", name: "Sapphire Preferred", issuer: "Chase"),
-    CreditCard(id: "chase-sapphire-reserve", name: "Sapphire Reserve", issuer: "Chase"),
-    CreditCard(id: "chase-freedom-unlimited", name: "Freedom Unlimited", issuer: "Chase"),
-    CreditCard(id: "amex-platinum", name: "Platinum Card", issuer: "Amex"),
-    CreditCard(id: "amex-gold", name: "Gold Card", issuer: "Amex"),
-    CreditCard(id: "amex-blue-cash-preferred", name: "Blue Cash Preferred", issuer: "Amex"),
-    CreditCard(id: "citi-double-cash", name: "Double Cash", issuer: "Citi"),
-    CreditCard(id: "citi-premier", name: "Premier Card", issuer: "Citi"),
-    CreditCard(id: "capital-one-venture", name: "Venture Rewards", issuer: "Capital One"),
-    CreditCard(id: "capital-one-savor", name: "Savor Cash Rewards", issuer: "Capital One"),
-]
-
 enum OnboardingPersistence {
     static func markCompleted(selectedCards: [String] = []) {
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")

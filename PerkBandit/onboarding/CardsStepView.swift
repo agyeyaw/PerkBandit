@@ -8,7 +8,7 @@
 import SwiftUI
 
 private let navyColor = Color(red: 24/255, green: 32/255, blue: 51/255)
-private let issuerFilters = ["All", "Chase", "Amex", "Citi", "Capital One", "Other"]
+private let issuerFilters = ["All", "Chase", "Amex", "Capital One", "Citi", "Discover", "Wells Fargo", "Bank of America"]
 
 struct ManualCardSetupView: View {
     @Binding var selectedCards: [String]
@@ -16,11 +16,11 @@ struct ManualCardSetupView: View {
 
     @State private var searchText = ""
     @State private var selectedIssuer = "All"
+    @State private var showRequestSheet = false
 
     private var filteredCards: [CreditCard] {
-        mockCardCatalog.filter { card in
-            let matchesIssuer = selectedIssuer == "All" || card.issuer == selectedIssuer ||
-                (selectedIssuer == "Other" && !["Chase", "Amex", "Citi", "Capital One"].contains(card.issuer))
+        cardCatalog.filter { card in
+            let matchesIssuer = selectedIssuer == "All" || card.issuer == selectedIssuer
             let matchesSearch = searchText.isEmpty ||
                 card.name.localizedCaseInsensitiveContains(searchText) ||
                 card.issuer.localizedCaseInsensitiveContains(searchText)
@@ -118,6 +118,21 @@ struct ManualCardSetupView: View {
             }
             .listStyle(.plain)
 
+            // Don't see your card?
+            Button {
+                showRequestSheet = true
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "plus.circle")
+                        .font(.system(size: 14))
+                    Text("Don't see your card?")
+                        .font(.system(size: 14, weight: .medium))
+                }
+                .foregroundColor(navyColor)
+            }
+            .padding(.horizontal, 20)
+            .padding(.vertical, 8)
+
             // CTAs
             VStack(spacing: 10) {
                 Button(action: onAdvance) {
@@ -143,5 +158,8 @@ struct ManualCardSetupView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .background(Color.white.ignoresSafeArea())
+        .sheet(isPresented: $showRequestSheet) {
+            RequestCardSheet()
+        }
     }
 }

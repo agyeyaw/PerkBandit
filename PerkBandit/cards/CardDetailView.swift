@@ -6,7 +6,7 @@
 import SwiftUI
 
 struct CardDetailView: View {
-    let card: MockCard
+    let card: CreditCard
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         ZStack {
@@ -38,8 +38,42 @@ struct CardDetailView: View {
                         // Card details
                         cardDetailsSection
 
+                        // Rewards section
+                        rewardsSection
+
+                        // Credits & Benefits section
+                        if !card.statementCredits.isEmpty {
+                            creditsSection
+                        }
+
+                        // Activation requirements
+                        if let activation = card.activationRequired {
+                            activationSection(activation)
+                        }
+
+                        // Exclusions
+                        if !card.exclusions.isEmpty {
+                            exclusionsSection
+                        }
+
                         // Connect button
                         connectToAutomateButton
+
+                        // View Official Terms
+                        if let url = URL(string: card.sourceURL) {
+                            Link(destination: url) {
+                                HStack(spacing: 6) {
+                                    Image(systemName: "doc.text")
+                                        .font(.subheadline)
+                                    Text("View Official Terms")
+                                        .font(.subheadline.weight(.medium))
+                                }
+                                .foregroundStyle(.blue)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 10)
+                            }
+                            .padding(.horizontal)
+                        }
 
                         Spacer()
                     }
@@ -96,22 +130,122 @@ struct CardDetailView: View {
 
     private var cardDetailsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            infoRow(label: "Annual Fee", value: "$95")
-            infoRow(label: "Renewal Date", value: "Apr 12, 2025")
-            infoRow(label: "Benefits (6)", value: "3 available")
-            infoRow(label: "Welcome Bonus", value: "$1,200 to go")
-            infoRow(label: "Last Confirmed", value: "8 days ago")
+            infoRow(label: "Annual Fee", value: card.annualFee)
+            infoRow(label: "Network", value: card.network)
 
             HStack(alignment: .top) {
-                Text("Data Source")
+                Text("Verified")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                 Spacer()
                 VStack(alignment: .trailing, spacing: 2) {
-                    Text("PerkBandit Catalog")
+                    Text(card.lastVerified)
                         .font(.subheadline)
-                    Text("Updated Apr 1, 2025")
+                    Text("PerkBandit Catalog")
                         .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(.white.opacity(0.6))
+        )
+        .padding(.horizontal)
+    }
+
+    private var rewardsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Rewards")
+                .font(.headline.weight(.semibold))
+
+            ForEach(card.rewardRules, id: \.self) { rule in
+                HStack(alignment: .top) {
+                    Text(rule.multiplier)
+                        .font(.subheadline.weight(.bold))
+                        .frame(width: 50, alignment: .leading)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(rule.category)
+                            .font(.subheadline)
+                        if let cap = rule.capDescription {
+                            Text(cap)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(.white.opacity(0.6))
+        )
+        .padding(.horizontal)
+    }
+
+    private var creditsSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Credits & Benefits")
+                .font(.headline.weight(.semibold))
+
+            ForEach(card.statementCredits, id: \.self) { credit in
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(credit.description)
+                            .font(.subheadline.weight(.medium))
+                        if let notes = credit.notes {
+                            Text(notes)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    Spacer()
+                    Text(credit.amount)
+                        .font(.subheadline.weight(.semibold))
+                }
+            }
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(.white.opacity(0.6))
+        )
+        .padding(.horizontal)
+    }
+
+    private func activationSection(_ text: String) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "exclamationmark.circle.fill")
+                .foregroundStyle(.orange)
+            VStack(alignment: .leading, spacing: 2) {
+                Text("Activation Required")
+                    .font(.subheadline.weight(.semibold))
+                Text(text)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+        }
+        .padding()
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(.white.opacity(0.6))
+        )
+        .padding(.horizontal)
+    }
+
+    private var exclusionsSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Exclusions")
+                .font(.subheadline.weight(.semibold))
+            ForEach(card.exclusions, id: \.self) { exclusion in
+                HStack(alignment: .top, spacing: 6) {
+                    Text("•")
+                        .foregroundStyle(.secondary)
+                    Text(exclusion)
+                        .font(.caption)
                         .foregroundStyle(.secondary)
                 }
             }
@@ -171,6 +305,6 @@ struct CardDetailView: View {
 
 #Preview {
     NavigationStack {
-        CardDetailView(card: MockCard.samples[0])
+        CardDetailView(card: cardCatalog[0])
     }
 }

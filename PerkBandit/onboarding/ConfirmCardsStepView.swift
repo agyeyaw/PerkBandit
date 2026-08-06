@@ -30,7 +30,7 @@ struct ConfirmCardsStepView: View {
                     // Card list
                     VStack(spacing: 0) {
                         ForEach(selectedCards, id: \.self) { cardId in
-                            if let card = mockCardCatalog.first(where: { $0.id == cardId }) {
+                            if let card = cardCatalog.first(where: { $0.id == cardId }) {
                                 ConfirmCardRow(
                                     card: card,
                                     onRemove: {

@@ -50,10 +50,12 @@ private let pages: [OnboardingPage] = [
 
 struct OnboardingView: View {
     let onFinished: () -> Void
+    var onLogin: (() -> Void)?
 
+    @EnvironmentObject var authManager: AuthManager
     @State private var currentPage = 0
     @State private var agreedToTerms = false
-    @State private var showLogin = false
+    @State private var showLoginSheet = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -140,7 +142,7 @@ struct OnboardingView: View {
 
                 // I Already Have An Account button
                 Button {
-                    showLogin = true
+                    showLoginSheet = true
                 } label: {
                     Text("I Already Have An Account")
                         .font(.system(size: 16, weight: .semibold))
@@ -159,8 +161,67 @@ struct OnboardingView: View {
             .ignoresSafeArea(.container, edges: .bottom)
         }
         .background(Color.white.ignoresSafeArea())
-        .sheet(isPresented: $showLogin) {
-            LoginView(onFinished: onFinished)
+        .sheet(isPresented: $showLoginSheet) {
+            VStack(spacing: 16) {
+                Text("Welcome back")
+                    .font(.system(size: 22, weight: .bold))
+                    .padding(.top, 28)
+
+                // Continue with Google
+                Button {
+                    Task {
+                        await authManager.signInWithGoogle()
+                        if authManager.isSignedIn {
+                            showLoginSheet = false
+                            onLogin?()
+                        }
+                    }
+                } label: {
+                    HStack(spacing: 8) {
+                        Image("GoogleLogo")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                        Text("Continue with Google")
+                            .font(.system(size: 16, weight: .semibold))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.white)
+                    .foregroundColor(.black)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.black, lineWidth: 1)
+                    )
+                }
+                .padding(.horizontal, 20)
+
+                // Continue with Email
+                Button {
+                    showLoginSheet = false
+                    onLogin?()
+                } label: {
+                    HStack(spacing: 8) {
+                        Image(systemName: "envelope")
+                            .font(.system(size: 16))
+                        Text("Continue with Email")
+                            .font(.system(size: 16, weight: .semibold))
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(Color.white)
+                    .foregroundColor(.black)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 14)
+                            .stroke(Color.black, lineWidth: 1)
+                    )
+                }
+                .padding(.horizontal, 20)
+
+                Spacer()
+            }
+            .presentationDetents([.height(280)])
+            .presentationDragIndicator(.visible)
         }
     }
 }

@@ -4,11 +4,13 @@
 //
 
 import SwiftUI
+import FirebaseAuth
 
 struct HomeView: View {
     var onViewCards: () -> Void = {}
 
     @EnvironmentObject var cardStore: CardStore
+    @EnvironmentObject var authManager: AuthManager
     @State private var showNotifications = false
     @State private var hasCardDataOverride: Bool? = nil
 
@@ -16,12 +18,16 @@ struct HomeView: View {
         hasCardDataOverride ?? cardStore.isUserSelected
     }
 
+    private var firstName: String {
+        authManager.user?.displayName ?? "there"
+    }
+
     private var greetingText: String {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
-        case 5..<12: return "Good Morning, Yaw"
-        case 12..<17: return "Good Afternoon, Yaw"
-        default: return "Good Evening, Yaw"
+        case 5..<12: return "Good Morning, \(firstName)"
+        case 12..<17: return "Good Afternoon, \(firstName)"
+        default: return "Good Evening, \(firstName)"
         }
     }
 
@@ -266,7 +272,7 @@ struct HomeHeroView: View {
             // Greeting, notification bell, and Scout
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("Hi, Justin")
+                    Text(greetingText)
                         .font(.title3)
                         .foregroundStyle(.white.opacity(0.6))
 
@@ -577,4 +583,5 @@ struct OpportunityRow: View {
 #Preview {
     HomeView()
         .environmentObject(CardStore())
+        .environmentObject(AuthManager())
 }

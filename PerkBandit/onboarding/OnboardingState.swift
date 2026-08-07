@@ -9,9 +9,9 @@ import Foundation
 import Combine
 
 enum UserOnboardingStep {
-    case scoutIntro, nameEntry, goals, setupMethod, manualCards, confirmCards, connectAccounts, demo
+    case nameEntry, goals, setupMethod, manualCards, confirmCards, connectAccounts, demo
     case welcomeBonus, benefitStatus, recommendationPrefs, pointValuation
-    case notifications, dataConfidence, firstValue, completion
+    case notifications, dataConfidence, firstValue, auth, completion
 }
 
 enum SetupMethod {

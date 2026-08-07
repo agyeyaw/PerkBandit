@@ -6,13 +6,33 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		C81F4C253024153400983BDD /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = C81F4C243024153400983BDD /* FirebaseAuth */; };
+		C81F4C3030242E5B00983BDD /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = C81F4C2F30242E5B00983BDD /* GoogleSignIn */; };
+		C81F4C3230242E5B00983BDD /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = C81F4C3130242E5B00983BDD /* GoogleSignInSwift */; };
+		C81F4C3D3025574900983BDD /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = C81F4C3C3025574900983BDD /* FirebaseFirestore */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		C81F4AD730169D8C00983BDD /* PerkBandit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PerkBandit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		C81F4C3430242FD500983BDD /* Exceptions for "PerkBandit" folder in "PerkBandit" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = C81F4AD630169D8C00983BDD /* PerkBandit */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		C81F4AD930169D8C00983BDD /* PerkBandit */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				C81F4C3430242FD500983BDD /* Exceptions for "PerkBandit" folder in "PerkBandit" target */,
+			);
 			path = PerkBandit;
 			sourceTree = "<group>";
 		};
@@ -23,6 +43,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C81F4C3230242E5B00983BDD /* GoogleSignInSwift in Frameworks */,
+				C81F4C3D3025574900983BDD /* FirebaseFirestore in Frameworks */,
+				C81F4C253024153400983BDD /* FirebaseAuth in Frameworks */,
+				C81F4C3030242E5B00983BDD /* GoogleSignIn in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -33,6 +57,7 @@
 			isa = PBXGroup;
 			children = (
 				C81F4AD930169D8C00983BDD /* PerkBandit */,
+				C81F4C3B3025574900983BDD /* Frameworks */,
 				C81F4AD830169D8C00983BDD /* Products */,
 			);
 			sourceTree = "<group>";
@@ -43,6 +68,13 @@
 				C81F4AD730169D8C00983BDD /* PerkBandit.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		C81F4C3B3025574900983BDD /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -65,6 +97,10 @@
 			);
 			name = PerkBandit;
 			packageProductDependencies = (
+				C81F4C243024153400983BDD /* FirebaseAuth */,
+				C81F4C2F30242E5B00983BDD /* GoogleSignIn */,
+				C81F4C3130242E5B00983BDD /* GoogleSignInSwift */,
+				C81F4C3C3025574900983BDD /* FirebaseFirestore */,
 			);
 			productName = PerkBandit;
 			productReference = C81F4AD730169D8C00983BDD /* PerkBandit.app */;
@@ -94,6 +130,10 @@
 			);
 			mainGroup = C81F4ACE30169D8C00983BDD;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				C81F4C233024153400983BDD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				C81F4C2E30242E5B00983BDD /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = C81F4AD830169D8C00983BDD /* Products */;
 			projectDirPath = "";
@@ -256,6 +296,7 @@
 				DEVELOPMENT_TEAM = 9K3T7J3J5P;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PerkBandit/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -288,6 +329,7 @@
 				DEVELOPMENT_TEAM = 9K3T7J3J5P;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = PerkBandit/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -332,6 +374,48 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		C81F4C233024153400983BDD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.17.0;
+			};
+		};
+		C81F4C2E30242E5B00983BDD /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 9.2.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		C81F4C243024153400983BDD /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C81F4C233024153400983BDD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		C81F4C2F30242E5B00983BDD /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C81F4C2E30242E5B00983BDD /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		C81F4C3130242E5B00983BDD /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C81F4C2E30242E5B00983BDD /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
+		C81F4C3C3025574900983BDD /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = C81F4C233024153400983BDD /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = C81F4ACF30169D8C00983BDD /* Project object */;
 }

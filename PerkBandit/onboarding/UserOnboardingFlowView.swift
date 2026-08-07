@@ -11,65 +11,74 @@ private let navyColor = Color(red: 24/255, green: 32/255, blue: 51/255)
 
 struct UserOnboardingFlowView: View {
     let onFinished: () -> Void
+    var onBack: (() -> Void)? = nil
 
     @EnvironmentObject var cardStore: CardStore
     @StateObject private var state = OnboardingState()
-    @State private var stepStack: [UserOnboardingStep] = [.scoutIntro]
+    @State private var stepStack: [UserOnboardingStep] = [.nameEntry]
 
     private var currentStep: UserOnboardingStep { stepStack.last! }
 
     private var progressIndex: Int {
         switch currentStep {
-        case .scoutIntro: return 0
-        case .nameEntry: return 1
-        case .goals: return 2
-        case .setupMethod, .manualCards, .confirmCards, .connectAccounts, .demo: return 3
-        case .welcomeBonus, .benefitStatus: return 4
-        case .recommendationPrefs, .pointValuation: return 5
-        case .notifications: return 6
-        case .dataConfidence, .firstValue: return 7
+        case .nameEntry: return 0
+        case .goals: return 1
+        case .setupMethod, .manualCards, .confirmCards, .connectAccounts, .demo: return 2
+        case .welcomeBonus, .benefitStatus: return 3
+        case .recommendationPrefs, .pointValuation: return 4
+        case .notifications: return 5
+        case .dataConfidence, .firstValue: return 6
+        case .auth: return 7
         case .completion: return 8
         }
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            // Top nav bar
-            HStack {
-                Button(action: goBack) {
-                    ZStack {
-                        Circle().fill(Color(.systemGray6)).frame(width: 40, height: 40)
-                        Image(systemName: "chevron.left")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.primary)
-                    }
-                }
-                .opacity(stepStack.count <= 1 ? 0 : 1)
-                .disabled(stepStack.count <= 1)
-
-                Spacer()
-
-                // 5 progress dots
-                HStack(spacing: 6) {
-                    ForEach(0..<9, id: \.self) { i in
-                        if i == progressIndex {
-                            RoundedRectangle(cornerRadius: 4)
-                                .fill(navyColor)
-                                .frame(width: 24, height: 8)
+            if currentStep != .auth {
+                // Top nav bar
+                HStack {
+                    Button(action: {
+                        if stepStack.count <= 1 {
+                            onBack?()
                         } else {
-                            Circle()
-                                .fill(Color.gray.opacity(0.35))
-                                .frame(width: 8, height: 8)
+                            goBack()
+                        }
+                    }) {
+                        ZStack {
+                            Circle().fill(Color(.systemGray6)).frame(width: 40, height: 40)
+                            Image(systemName: "chevron.left")
+                                .font(.system(size: 16, weight: .semibold))
+                                .foregroundColor(.primary)
                         }
                     }
+                    .opacity(stepStack.count <= 1 && onBack == nil ? 0 : 1)
+                    .disabled(stepStack.count <= 1 && onBack == nil)
+
+                    Spacer()
+
+                    // Progress dots
+                    HStack(spacing: 6) {
+                        ForEach(0..<9, id: \.self) { i in
+                            if i == progressIndex {
+                                RoundedRectangle(cornerRadius: 4)
+                                    .fill(navyColor)
+                                    .frame(width: 24, height: 8)
+                            } else {
+                                Circle()
+                                    .fill(Color.gray.opacity(0.35))
+                                    .frame(width: 8, height: 8)
+                            }
+                        }
+                    }
+
+                    Spacer()
+
+                    // Balance spacer matching back button width
+                    Color.clear.frame(width: 40, height: 40)
                 }
-
-                Spacer()
-
-                // Balance spacer matching back button width
-                Color.clear.frame(width: 40, height: 40)
+                .padding(.horizontal, 20).padding(.top, 12).padding(.bottom, 8)
             }
-            .padding(.horizontal, 20).padding(.top, 12).padding(.bottom, 8)
 
             // Step content
             currentStepView
@@ -81,9 +90,6 @@ struct UserOnboardingFlowView: View {
     @ViewBuilder
     private var currentStepView: some View {
         switch currentStep {
-        case .scoutIntro:
-            ScoutStepView(onAdvance: { advance(to: .nameEntry) })
-
         case .nameEntry:
             NameEntryStepView(
                 userName: $state.userName,
@@ -193,12 +199,19 @@ struct UserOnboardingFlowView: View {
             FirstValuePreviewStepView(
                 selectedCards: state.selectedCards,
                 setupMethod: state.setupMethod,
-                onAdvance: { advance(to: .completion) }
+                onAdvance: { advance(to: .auth) }
             )
+
+        case .auth:
+            AuthView {
+                advance(to: .completion)
+            }
 
         case .completion:
             CompletionStepView(onAdvance: {
                 OnboardingPersistence.markCompleted(selectedCards: state.selectedCards)
+                let capturedState = state
+                Task { await UserProfileService.saveOnboardingData(capturedState) }
                 cardStore.reload()
                 onFinished()
             })

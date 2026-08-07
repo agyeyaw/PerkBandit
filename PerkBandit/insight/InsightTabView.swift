@@ -7,6 +7,7 @@ import SwiftUI
 
 struct InsightTabView: View {
     var onRestartOnboarding: () -> Void
+    @EnvironmentObject private var authManager: AuthManager
 
     private let navy = Color(red: 24/255, green: 32/255, blue: 51/255)
 
@@ -19,6 +20,14 @@ struct InsightTabView: View {
                     .font(.title)
                     .foregroundColor(.white)
                 Spacer()
+
+                Button("Sign Out") {
+                    authManager.signOut()
+                }
+                .buttonStyle(.bordered)
+                .tint(.red)
+                .padding(.bottom, 12)
+
                 #if DEBUG
                 Button("Restart Onboarding") {
                     onRestartOnboarding()
@@ -34,4 +43,5 @@ struct InsightTabView: View {
 
 #Preview {
     InsightTabView(onRestartOnboarding: { })
+        .environmentObject(AuthManager())
 }

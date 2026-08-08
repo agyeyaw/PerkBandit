@@ -12,6 +12,7 @@ struct HomeView: View {
     @EnvironmentObject var cardStore: CardStore
     @EnvironmentObject var authManager: AuthManager
     @State private var showNotifications = false
+    @State private var showProfile = false
     @State private var hasCardDataOverride: Bool? = nil
 
     private var hasCardData: Bool {
@@ -23,12 +24,7 @@ struct HomeView: View {
     }
 
     private var greetingText: String {
-        let hour = Calendar.current.component(.hour, from: Date())
-        switch hour {
-        case 5..<12: return "Good Morning, \(firstName)"
-        case 12..<17: return "Good Afternoon, \(firstName)"
-        default: return "Good Evening, \(firstName)"
-        }
+        "Hi, \(firstName)"
     }
 
     var body: some View {
@@ -49,7 +45,8 @@ struct HomeView: View {
                     // Greeting, notification bell, and Scout (on navy background)
                     HomeHeroView(
                         greetingText: greetingText,
-                        showNotifications: $showNotifications
+                        showNotifications: $showNotifications,
+                        showProfile: $showProfile
                     )
 
                     // Card recommendation on navy
@@ -259,6 +256,10 @@ struct HomeView: View {
                     .zIndex(1)
             }
         }
+        .sheet(isPresented: $showProfile) {
+            ProfileView()
+                .environmentObject(authManager)
+        }
     }
 }
 
@@ -267,9 +268,10 @@ struct HomeView: View {
 struct HomeHeroView: View {
     let greetingText: String
     @Binding var showNotifications: Bool
+    @Binding var showProfile: Bool
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // Greeting, notification bell, and Scout
+            // Greeting and notification bell
             HStack(alignment: .top) {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(greetingText)
@@ -297,7 +299,7 @@ struct HomeHeroView: View {
 
                 Spacer()
 
-                VStack(spacing: 16) {
+                HStack(spacing: 4) {
                     Button {
                         withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
                             showNotifications = true
@@ -316,29 +318,18 @@ struct HomeHeroView: View {
                         }
                     }
 
-                    VStack(spacing: 4) {
-                        ZStack {
-                            Circle()
-                                .fill(PBTheme.accent.opacity(0.15))
-                                .frame(width: 64, height: 64)
-
-                            Image(systemName: "theatermask.and.paintbrush")
-                                .font(.system(size: 28))
-                                .foregroundStyle(PBTheme.accent)
-                        }
-
-                        HStack(spacing: 4) {
-                            Text("Scout")
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(.white)
-                            Image(systemName: "sparkle")
-                                .font(.caption2)
-                                .foregroundStyle(PBTheme.accent)
-                        }
+                    Button {
+                        showProfile = true
+                    } label: {
+                        Image(systemName: "person.circle.fill")
+                            .font(.title2)
+                            .foregroundStyle(.white.opacity(0.8))
+                            .padding(8)
                     }
                 }
             }
-            .padding(.horizontal, 20)
+            .padding(.leading, 20)
+            .padding(.trailing, 4)
             .padding(.top, 12)
             .padding(.bottom, 16)
         }
@@ -577,6 +568,74 @@ struct OpportunityRow: View {
         }
         .padding(.horizontal, 14)
         .padding(.vertical, 12)
+    }
+}
+
+// MARK: - Profile View
+
+struct ProfileView: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var authManager: AuthManager
+
+    var body: some View {
+        NavigationStack {
+            ZStack {
+                PBTheme.background
+                    .ignoresSafeArea()
+
+                VStack(spacing: 32) {
+                    Image(systemName: "person.circle.fill")
+                        .font(.system(size: 72))
+                        .foregroundStyle(.white.opacity(0.6))
+
+                    if let name = authManager.user?.displayName {
+                        Text(name)
+                            .font(.title2.weight(.bold))
+                            .foregroundStyle(.white)
+                    }
+
+                    if let email = authManager.user?.email {
+                        Text(email)
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.6))
+                    }
+
+                    Spacer()
+
+                    Button(role: .destructive) {
+                        authManager.signOut()
+                        dismiss()
+                    } label: {
+                        Text("Sign Out")
+                            .font(.body.weight(.semibold))
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 14)
+                            .background(
+                                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                                    .fill(.red.opacity(0.12))
+                            )
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 40)
+                }
+                .padding(.top, 40)
+            }
+            .navigationTitle("Profile")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(.white.opacity(0.6))
+                    }
+                }
+            }
+        }
     }
 }
 

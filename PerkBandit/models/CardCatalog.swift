@@ -16,10 +16,42 @@ struct RewardRule: Hashable {
     let capDescription: String?
 }
 
+enum BenefitFrequency: String, Codable, Hashable {
+    case monthly, semiannual, annual, oneTime
+
+    var label: String {
+        switch self {
+        case .monthly: return "Monthly"
+        case .semiannual: return "Semiannual"
+        case .annual: return "Annual"
+        case .oneTime: return "One-time"
+        }
+    }
+
+    var periodsPerYear: Int {
+        switch self {
+        case .monthly: return 12
+        case .semiannual: return 2
+        case .annual: return 1
+        case .oneTime: return 1
+        }
+    }
+}
+
 struct StatementCredit: Hashable {
     let description: String
     let amount: String
     let notes: String?
+    let frequency: BenefitFrequency
+
+    var perPeriodAmount: Double {
+        let cleaned = amount
+            .replacingOccurrences(of: "$", with: "")
+            .replacingOccurrences(of: "/year", with: "")
+            .replacingOccurrences(of: ",", with: "")
+        let annual = Double(cleaned) ?? 0
+        return annual / Double(frequency.periodsPerYear)
+    }
 }
 
 struct CreditCard: Identifiable, Hashable {
@@ -77,7 +109,7 @@ let cardCatalog: [CreditCard] = [
             RewardRule(category: "Everything else", multiplier: "1x", capDescription: nil),
         ],
         statementCredits: [
-            StatementCredit(description: "Hotel credit", amount: "$50/year", notes: "Via Chase Travel"),
+            StatementCredit(description: "Hotel credit", amount: "$50/year", notes: "Via Chase Travel", frequency: .annual),
         ],
         activationRequired: nil,
         exclusions: ["Target, Walmart, and wholesale clubs excluded from dining"],
@@ -101,7 +133,7 @@ let cardCatalog: [CreditCard] = [
             RewardRule(category: "Everything else", multiplier: "1x", capDescription: nil),
         ],
         statementCredits: [
-            StatementCredit(description: "Travel credit", amount: "$300/year", notes: nil),
+            StatementCredit(description: "Travel credit", amount: "$300/year", notes: nil, frequency: .annual),
         ],
         activationRequired: nil,
         exclusions: [],
@@ -192,8 +224,8 @@ let cardCatalog: [CreditCard] = [
             RewardRule(category: "Everything else", multiplier: "1x", capDescription: nil),
         ],
         statementCredits: [
-            StatementCredit(description: "Dining credit", amount: "$120/year", notes: "Up to $10/month at select restaurants"),
-            StatementCredit(description: "Uber Cash", amount: "$120/year", notes: "Up to $10/month"),
+            StatementCredit(description: "Dining credit", amount: "$120/year", notes: "Up to $10/month at select restaurants", frequency: .monthly),
+            StatementCredit(description: "Uber Cash", amount: "$120/year", notes: "Up to $10/month", frequency: .monthly),
         ],
         activationRequired: nil,
         exclusions: ["Superstores (Walmart, Target) excluded from supermarket category"],
@@ -217,11 +249,11 @@ let cardCatalog: [CreditCard] = [
             RewardRule(category: "Everything else", multiplier: "1x", capDescription: nil),
         ],
         statementCredits: [
-            StatementCredit(description: "Airline fee credit", amount: "$200/year", notes: "Incidental fees on selected airline"),
-            StatementCredit(description: "Hotel credit", amount: "$200/year", notes: "Via Amex Travel"),
-            StatementCredit(description: "Digital entertainment", amount: "$240/year", notes: "Up to $20/month"),
-            StatementCredit(description: "Uber Cash", amount: "$200/year", notes: "$15/month + $20 December"),
-            StatementCredit(description: "Saks Fifth Avenue", amount: "$100/year", notes: "Up to $50 semiannually"),
+            StatementCredit(description: "Airline fee credit", amount: "$200/year", notes: "Incidental fees on selected airline", frequency: .annual),
+            StatementCredit(description: "Hotel credit", amount: "$200/year", notes: "Via Amex Travel", frequency: .annual),
+            StatementCredit(description: "Digital entertainment", amount: "$240/year", notes: "Up to $20/month", frequency: .monthly),
+            StatementCredit(description: "Uber Cash", amount: "$200/year", notes: "$15/month + $20 December", frequency: .monthly),
+            StatementCredit(description: "Saks Fifth Avenue", amount: "$100/year", notes: "Up to $50 semiannually", frequency: .semiannual),
         ],
         activationRequired: "Select airline for fee credit",
         exclusions: [],
@@ -331,7 +363,7 @@ let cardCatalog: [CreditCard] = [
             RewardRule(category: "Everything else", multiplier: "2x", capDescription: nil),
         ],
         statementCredits: [
-            StatementCredit(description: "Travel credit", amount: "$300/year", notes: "Via Capital One Travel"),
+            StatementCredit(description: "Travel credit", amount: "$300/year", notes: "Via Capital One Travel", frequency: .annual),
         ],
         activationRequired: nil,
         exclusions: [],
@@ -424,7 +456,7 @@ let cardCatalog: [CreditCard] = [
             RewardRule(category: "Everything else", multiplier: "1x", capDescription: nil),
         ],
         statementCredits: [
-            StatementCredit(description: "Hotel credit", amount: "$100/year", notes: "Via thankyou.com"),
+            StatementCredit(description: "Hotel credit", amount: "$100/year", notes: "Via thankyou.com", frequency: .annual),
         ],
         activationRequired: nil,
         exclusions: [],
@@ -555,7 +587,7 @@ let cardCatalog: [CreditCard] = [
             RewardRule(category: "Everything else", multiplier: "1x", capDescription: nil),
         ],
         statementCredits: [
-            StatementCredit(description: "Airline credit", amount: "$50/year", notes: "On selected airline purchases"),
+            StatementCredit(description: "Airline credit", amount: "$50/year", notes: "On selected airline purchases", frequency: .annual),
         ],
         activationRequired: nil,
         exclusions: [],
@@ -601,7 +633,7 @@ let cardCatalog: [CreditCard] = [
             RewardRule(category: "Everything else", multiplier: "1.5 pts/$1", capDescription: nil),
         ],
         statementCredits: [
-            StatementCredit(description: "Airline incidental credit", amount: "$100/year", notes: "TSA PreCheck/Global Entry every 4 years"),
+            StatementCredit(description: "Airline incidental credit", amount: "$100/year", notes: "TSA PreCheck/Global Entry every 4 years", frequency: .annual),
         ],
         activationRequired: nil,
         exclusions: [],

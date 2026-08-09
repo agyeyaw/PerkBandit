@@ -5,6 +5,11 @@
 
 import SwiftUI
 
+struct CardSubPageDestination: Hashable {
+    let pageName: String
+    let cardDefinitionID: String
+}
+
 struct CardsTabView: View {
     @EnvironmentObject var cardStore: CardStore
     @State private var selectedIndex: Int = 0
@@ -12,7 +17,7 @@ struct CardsTabView: View {
     @State private var path = NavigationPath()
     private let dragThreshold: CGFloat = 40
 
-    private var cards: [CreditCard] { cardStore.cards }
+    private var cards: [CreditCard] { cardStore.creditCards }
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -108,12 +113,12 @@ struct CardsTabView: View {
         .navigationDestination(for: CreditCard.self) { card in
             CardDetailView(card: card)
         }
-        .navigationDestination(for: String.self) { destination in
-            switch destination {
-            case "Benefits": BenefitsPageView()
-            case "Welcome Bonus": WelcomeBonusPageView()
+        .navigationDestination(for: CardSubPageDestination.self) { dest in
+            switch dest.pageName {
+            case "Benefits": BenefitsPageView(cardDefinitionID: dest.cardDefinitionID)
+            case "Welcome Bonus": WelcomeBonusPageView(cardDefinitionID: dest.cardDefinitionID)
             case "Value": CardValuePageView()
-            default: CardSubPageView(title: destination)
+            default: CardSubPageView(title: dest.pageName)
             }
         }
         }

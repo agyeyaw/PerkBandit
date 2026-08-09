@@ -220,6 +220,7 @@ struct OnboardingView: View {
 
                 Spacer()
             }
+            .background(Color.white)
             .presentationDetents([.height(280)])
             .presentationDragIndicator(.visible)
         }

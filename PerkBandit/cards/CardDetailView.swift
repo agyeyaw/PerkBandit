@@ -7,6 +7,7 @@ import SwiftUI
 
 struct CardDetailView: View {
     let card: CreditCard
+    var userCard: UserCard? = nil
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         ZStack {
@@ -99,13 +100,20 @@ struct CardDetailView: View {
             .toolbar(.hidden, for: .tabBar)
     }
 
+    private var trackingLabel: String {
+        if let mode = userCard?.trackingMode {
+            return mode == .linked ? "Auto Tracked" : "Manually Tracked"
+        }
+        return "Manually Tracked"
+    }
+
     private var manuallyTrackedSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Image(systemName: "checkmark.circle.fill")
                     .foregroundStyle(.green)
                     .font(.title3)
-                Text("Manually Tracked")
+                Text(trackingLabel)
                     .font(.headline.weight(.semibold))
                 Spacer()
                 Button("Edit") {}
@@ -282,7 +290,7 @@ struct CardDetailView: View {
     }
 
     private func actionButton(icon: String, label: String) -> some View {
-        NavigationLink(value: label) {
+        NavigationLink(value: CardSubPageDestination(pageName: label, cardDefinitionID: card.id)) {
             VStack(spacing: 8) {
                 Circle()
                     .fill(.white.opacity(0.7))

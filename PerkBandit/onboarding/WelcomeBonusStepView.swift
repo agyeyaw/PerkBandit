@@ -115,7 +115,7 @@ private struct BonusCardSection: View {
                 VStack(spacing: 12) {
                     BonusField(label: "Spending requirement", placeholder: "$4,000", text: $detail.spendingRequirement)
                     BonusField(label: "Amount spent so far", placeholder: "$2,800", text: $detail.amountSpent)
-                    BonusField(label: "Deadline", placeholder: "September 30", text: $detail.deadline)
+                    BonusDeadlinePicker(deadline: $detail.deadline)
                     BonusField(label: "Bonus reward", placeholder: "60,000 points", text: $detail.bonusReward)
                 }
                 .padding(12)
@@ -166,6 +166,45 @@ private struct BonusField: View {
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 10))
                 .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(.systemGray4), lineWidth: 1))
+        }
+    }
+}
+
+private struct BonusDeadlinePicker: View {
+    @Binding var deadline: String
+    @State private var selectedDate: Date = Calendar.current.date(byAdding: .month, value: 3, to: Date()) ?? Date()
+    @State private var didInitialize = false
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Deadline")
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(.secondary)
+            DatePicker("", selection: $selectedDate, in: Date()..., displayedComponents: .date)
+                .datePickerStyle(.compact)
+                .labelsHidden()
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color(.systemGray4), lineWidth: 1))
+                .onChange(of: selectedDate) { _, newValue in
+                    deadline = ISO8601DateFormatter().string(from: newValue)
+                }
+        }
+        .onAppear {
+            guard !didInitialize else { return }
+            didInitialize = true
+            // Parse existing deadline string if present
+            if !deadline.isEmpty {
+                let iso = ISO8601DateFormatter()
+                if let date = iso.date(from: deadline) {
+                    selectedDate = date
+                    return
+                }
+            }
+            // Set default and store ISO string
+            deadline = ISO8601DateFormatter().string(from: selectedDate)
         }
     }
 }

@@ -46,7 +46,7 @@ struct HomeView: View {
                 let opportunities = cardStore.opportunities
 
                 VStack(spacing: 0) {
-                    // Greeting, notification bell, and Scout (on navy background)
+                    // Greeting, notification bell, and profile (on navy background)
                     HomeHeroView(
                         greetingText: greetingText,
                         opportunityCount: opportunities.count,
@@ -312,19 +312,19 @@ struct CardRecommendationCard: View {
                     .font(.subheadline.weight(.bold))
                     .foregroundStyle(.white)
 
-                Text("Tell Scout where you're shopping to find the best card. You can also add or update your cards for more personalized recommendations.")
+                Text("Tell PerkBandit where you're shopping to find the best card. You can also add or update your cards for more personalized recommendations.")
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.5))
                     .lineLimit(3)
 
                 HStack(spacing: 12) {
                     Button {
-                        // Ask Scout action
+                        // Ask PerkBandit action
                     } label: {
                         HStack(spacing: 4) {
                             Image(systemName: "message.fill")
                                 .font(.caption2)
-                            Text("Ask Scout")
+                            Text("Ask PerkBandit")
                                 .font(.caption.weight(.semibold))
                         }
                         .foregroundStyle(.white)
@@ -370,46 +370,24 @@ struct OpportunityHeroCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             // Label
-            HStack(spacing: 6) {
-                Image(systemName: "shield.checkered")
-                    .font(.caption2)
-                    .foregroundStyle(PBTheme.accent)
-                Text("Scout's Best Opportunity")
-                    .font(.caption.weight(.medium))
-                    .foregroundStyle(.white.opacity(0.6))
+            Text("Top Opportunity")
+                .font(.caption.weight(.medium))
+                .foregroundStyle(.white.opacity(0.6))
+
+            // Full-width card visual
+            if let def = cardDef {
+                CreditCardVisual(card: def)
             }
 
-            // Card image + recommendation text
-            HStack(spacing: 14) {
-                if let def = cardDef {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(
-                            LinearGradient(
-                                colors: [def.gradientStart.color, def.gradientEnd.color],
-                                startPoint: .topLeading,
-                                endPoint: .bottomTrailing
-                            )
-                        )
-                        .frame(width: 72, height: 48)
-                        .overlay(
-                            Text(def.network)
-                                .font(.system(size: 9, weight: .bold))
-                                .foregroundStyle(.white.opacity(0.8))
-                            , alignment: .bottomTrailing
-                        )
-                        .padding(.trailing, 2)
-                }
+            VStack(alignment: .leading, spacing: 4) {
+                Text(opportunity.title)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(.white)
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(opportunity.title)
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(.white)
-
-                    Text(opportunity.subtitle)
-                        .font(.caption)
-                        .foregroundStyle(.white.opacity(0.5))
-                        .lineLimit(2)
-                }
+                Text(opportunity.subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.white.opacity(0.5))
+                    .lineLimit(2)
             }
 
             // Value estimate (only for expiring benefits where the value is a real credit amount)

@@ -57,4 +57,32 @@ enum UserProfileService {
             print("[UserProfileService] Firestore write failed: \(error.localizedDescription)")
         }
     }
+
+    static func saveCardState(_ cardData: [[String: Any]]) async {
+        guard let user = Auth.auth().currentUser else { return }
+        do {
+            try await Firestore.firestore().collection("users").document(user.uid)
+                .setData(["cardState": cardData, "updatedAt": FieldValue.serverTimestamp()], merge: true)
+        } catch {
+            print("[UserProfileService] Card state sync failed: \(error)")
+        }
+    }
+
+    static func loadPreferences() async -> (prefs: Set<String>, valuation: String)? {
+        guard let user = Auth.auth().currentUser else {
+            print("[UserProfileService] No authenticated user — skipping Firestore read.")
+            return nil
+        }
+
+        do {
+            let doc = try await Firestore.firestore().collection("users").document(user.uid).getDocument()
+            guard let data = doc.data() else { return nil }
+            let prefs = Set(data["recommendationPrefs"] as? [String] ?? [])
+            let valuation = data["pointValuation"] as? String ?? "perkbandit"
+            return (prefs, valuation)
+        } catch {
+            print("[UserProfileService] Firestore read failed: \(error.localizedDescription)")
+            return nil
+        }
+    }
 }

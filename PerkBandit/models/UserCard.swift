@@ -111,6 +111,7 @@ struct UserCard: Identifiable, Codable {
     var renewalDate: Date?
     var benefitStates: [UserBenefitState]
     var welcomeBonus: WelcomeBonus?
+    var activatedThisPeriod: Bool?
 
     // Resolve to catalog definition
     var definition: CreditCard? {

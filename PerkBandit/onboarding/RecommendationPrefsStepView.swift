@@ -12,7 +12,6 @@ private let recommendationOptions = [
     "Maximize travel points",
     "Prioritize welcome bonuses",
     "Use credits before they expire",
-    "Avoid cards with high balances",
     "Keep recommendations simple",
 ]
 

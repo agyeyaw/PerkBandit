@@ -214,7 +214,9 @@ struct UserOnboardingFlowView: View {
                     selectedCards: state.selectedCards,
                     bonusStatuses: state.cardBonusStatuses,
                     bonusDetails: state.cardBonusDetails,
-                    benefitStatuses: state.benefitStatuses
+                    benefitStatuses: state.benefitStatuses,
+                    recommendationPrefs: state.recommendationPrefs,
+                    pointValuation: state.pointValuation
                 )
                 let capturedState = state
                 Task { await UserProfileService.saveOnboardingData(capturedState) }

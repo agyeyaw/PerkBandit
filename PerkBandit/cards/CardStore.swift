@@ -6,40 +6,25 @@
 import Foundation
 import Combine
 
-struct ExpiringBenefit: Identifiable {
-    var id: String { "\(userCard.id)-\(benefit.id)" }
-    let userCard: UserCard
-    let benefit: UserBenefitState
-    let credit: StatementCredit
-}
-
 class CardStore: ObservableObject {
     @Published var cards: [UserCard]
     @Published var isUserSelected: Bool
+    @Published var recommendationPrefs: Set<RecommendationPreference> = []
+    @Published var pointValuation: String = "perkbandit"
 
     // Convenience: resolved catalog cards for views that only need display
     var creditCards: [CreditCard] {
         cards.compactMap { $0.definition }
     }
 
-    var recommendations: [Recommendation] {
-        RecommendationEngine.generateRecommendations(cards: cards)
-    }
-
-    var expiringBenefits: [ExpiringBenefit] {
-        cards.flatMap { userCard in
-            guard let def = userCard.definition else { return [ExpiringBenefit]() }
-            return userCard.benefitStates.compactMap { state in
-                guard state.isExpiringSoon,
-                      let credit = def.statementCredits.first(where: { $0.description == state.id })
-                else { return nil }
-                return ExpiringBenefit(userCard: userCard, benefit: state, credit: credit)
-            }
-        }
+    var opportunities: [Opportunity] {
+        OpportunityEngine.generateOpportunities(cards: cards)
     }
 
     private static let storageKey = "userCards"
     private static let legacyKey = "userSelectedCardIDs"
+    private static let prefsKey = "recommendationPrefs"
+    private static let valuationKey = "pointValuation"
 
     private static let idMigrations: [String: String] = [
         "citi-premier": "citi-strata-premier",
@@ -54,6 +39,7 @@ class CardStore: ObservableObject {
             isUserSelected = true
             backfillBenefitStates()
             resetExpiredBenefits()
+            loadPreferencesFromCache()
             return
         }
 
@@ -90,6 +76,18 @@ class CardStore: ObservableObject {
         if let data = try? JSONEncoder().encode(cards) {
             UserDefaults.standard.set(data, forKey: Self.storageKey)
         }
+        syncToFirestore()
+    }
+
+    private func syncToFirestore() {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        guard let data = try? encoder.encode(cards),
+              let jsonArray = try? JSONSerialization.jsonObject(with: data) as? [[String: Any]]
+        else { return }
+        Task {
+            await UserProfileService.saveCardState(jsonArray)
+        }
     }
 
     func reload() {
@@ -101,6 +99,7 @@ class CardStore: ObservableObject {
             isUserSelected = true
             backfillBenefitStates()
             resetExpiredBenefits()
+            loadPreferencesFromCache()
             return
         }
 
@@ -118,6 +117,29 @@ class CardStore: ObservableObject {
             isUserSelected = true
         }
         resetExpiredBenefits()
+        loadPreferencesFromCache()
+    }
+
+    // MARK: - Preferences
+
+    func loadPreferencesFromCache() {
+        let saved = UserDefaults.standard.stringArray(forKey: Self.prefsKey) ?? []
+        recommendationPrefs = Set(saved.compactMap { RecommendationPreference(from: $0) })
+        pointValuation = UserDefaults.standard.string(forKey: Self.valuationKey) ?? "perkbandit"
+    }
+
+    func savePreferences() {
+        UserDefaults.standard.set(recommendationPrefs.map(\.rawValue), forKey: Self.prefsKey)
+        UserDefaults.standard.set(pointValuation, forKey: Self.valuationKey)
+    }
+
+    func loadPreferencesFromFirestore() async {
+        guard let result = await UserProfileService.loadPreferences() else { return }
+        await MainActor.run {
+            self.recommendationPrefs = Set(result.prefs.compactMap { RecommendationPreference(from: $0) })
+            self.pointValuation = result.valuation
+            self.savePreferences()
+        }
     }
 
     // MARK: - Benefit Mutations
@@ -159,6 +181,14 @@ class CardStore: ObservableObject {
             }
         }
         if changed { save() }
+    }
+
+    // MARK: - Category Activation Mutations
+
+    func markCategoryActivated(userCardID: String) {
+        guard let ci = cards.firstIndex(where: { $0.id == userCardID }) else { return }
+        cards[ci].activatedThisPeriod = true
+        save()
     }
 
     // MARK: - Welcome Bonus Mutations

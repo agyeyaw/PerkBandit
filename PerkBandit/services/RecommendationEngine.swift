@@ -5,90 +5,50 @@
 
 import Foundation
 
-// MARK: - Types
+// MARK: - Recommendation Preferences
 
-enum RecommendationType: Equatable {
-    case expiringBenefit
-    case welcomeBonusAtRisk
-    case activationRequired
-    case annualFeeApproaching
-    case purchaseRecommendation
+enum RecommendationPreference: String, CaseIterable {
+    case maximizeCashback = "Maximize cashback"
+    case maximizeTravelPoints = "Maximize travel points"
+    case prioritizeWelcomeBonuses = "Prioritize welcome bonuses"
+    case useCreditsBeforeExpiry = "Use credits before they expire"
+    case keepSimple = "Keep recommendations simple"
 
-    var priority: Int {
-        switch self {
-        case .expiringBenefit: return 1
-        case .welcomeBonusAtRisk: return 2
-        case .activationRequired: return 3
-        case .annualFeeApproaching: return 4
-        case .purchaseRecommendation: return 5
-        }
-    }
-}
-
-enum RecommendationUrgency: Int, Comparable, Equatable {
-    case critical = 0
-    case high = 1
-    case medium = 2
-    case low = 3
-
-    static func < (lhs: Self, rhs: Self) -> Bool { lhs.rawValue < rhs.rawValue }
-
-    var label: String {
-        switch self {
-        case .critical: return "Urgent"
-        case .high: return "Expiring"
-        case .medium: return "Action"
-        case .low: return "Info"
-        }
-    }
-}
-
-struct Recommendation: Identifiable, Equatable {
-    let id: String
-    let type: RecommendationType
-    let title: String
-    let subtitle: String
-    let estimatedValue: Decimal?
-    let urgency: RecommendationUrgency
-    let cardDefinitionID: String?
-    let userCardID: String?
-    let explanation: String
-    let icon: String
-    let iconColor: String
+    init?(from string: String) { self.init(rawValue: string) }
 }
 
 // MARK: - Engine
 
-enum RecommendationEngine {
+enum OpportunityEngine {
 
-    static func generateRecommendations(cards: [UserCard], now: Date = Date()) -> [Recommendation] {
-        var results: [Recommendation] = []
-        results += expiringBenefitRecommendations(cards: cards, now: now)
-        results += welcomeBonusRecommendations(cards: cards, now: now)
-        results += activationRecommendations(cards: cards)
-        results += annualFeeRecommendations(cards: cards, now: now)
+    static func generateOpportunities(cards: [UserCard], now: Date = Date()) -> [Opportunity] {
+        var results: [Opportunity] = []
+        results += expiringBenefitOpportunities(cards: cards, now: now)
+        results += welcomeBonusOpportunities(cards: cards, now: now)
+        results += activationOpportunities(cards: cards)
+        results += annualFeeOpportunities(cards: cards, now: now)
         return results.sorted { ($0.type.priority, $0.urgency) < ($1.type.priority, $1.urgency) }
     }
 
     // MARK: - Priority 1: Expiring Benefits
 
-    private static func expiringBenefitRecommendations(cards: [UserCard], now: Date) -> [Recommendation] {
-        cards.flatMap { userCard -> [Recommendation] in
+    private static func expiringBenefitOpportunities(cards: [UserCard], now: Date) -> [Opportunity] {
+        cards.flatMap { userCard -> [Opportunity] in
             guard let def = userCard.definition else { return [] }
-            return userCard.benefitStates.compactMap { state -> Recommendation? in
+            return userCard.benefitStates.compactMap { state -> Opportunity? in
                 guard state.status != .used,
                       let days = state.daysUntilExpiry,
                       days >= 0, days <= 7,
                       let credit = def.statementCredits.first(where: { $0.description == state.id })
                 else { return nil }
 
-                let urgency: RecommendationUrgency
+                let urgency: OpportunityUrgency
                 if days <= 1 { urgency = .critical }
                 else if days <= 3 { urgency = .high }
                 else { urgency = .medium }
 
                 let cardName = def.name
-                return Recommendation(
+                return Opportunity(
                     id: "expiring-\(userCard.id)-\(state.id)",
                     type: .expiringBenefit,
                     title: "\(credit.description) — \(state.expiryText ?? "expiring soon")",
@@ -99,17 +59,21 @@ enum RecommendationEngine {
                     userCardID: userCard.id,
                     explanation: "Your \(credit.description) on the \(cardName) is expiring soon. Use it before you lose $\(Int(credit.perPeriodAmount)) in value.",
                     icon: iconForBenefit(credit.description),
-                    iconColor: urgency == .critical ? "red" : "orange"
+                    iconColor: urgency == .critical ? "red" : "orange",
+                    expirationDate: state.periodEnd,
+                    confidence: .estimated,
+                    progress: nil,
+                    benefitID: state.id
                 )
             }
         }
     }
 
-    // MARK: - Priority 2: Welcome Bonus at Risk
+    // MARK: - Priority 2: Welcome Bonus
 
-    private static func welcomeBonusRecommendations(cards: [UserCard], now: Date) -> [Recommendation] {
+    private static func welcomeBonusOpportunities(cards: [UserCard], now: Date) -> [Opportunity] {
         let cal = Calendar.current
-        return cards.compactMap { userCard -> Recommendation? in
+        return cards.compactMap { userCard -> Opportunity? in
             guard let bonus = userCard.welcomeBonus,
                   bonus.isTracking == true,
                   let target = bonus.targetSpend, target > 0
@@ -122,7 +86,7 @@ enum RecommendationEngine {
             let def = userCard.definition
             let cardName = def?.name ?? "Card"
 
-            let urgency: RecommendationUrgency
+            let urgency: OpportunityUrgency
             var explanation: String
 
             if let deadline = bonus.deadline {
@@ -150,9 +114,10 @@ enum RecommendationEngine {
             }
 
             let bonusDesc = bonus.bonusDescription ?? "welcome bonus"
-            return Recommendation(
+            let spendProgress = min(1.0, current / target)
+            return Opportunity(
                 id: "bonus-\(userCard.id)",
-                type: .welcomeBonusAtRisk,
+                type: .welcomeBonus,
                 title: "\(cardName) — $\(Int(remaining)) to go",
                 subtitle: bonusDesc,
                 estimatedValue: nil,
@@ -161,22 +126,27 @@ enum RecommendationEngine {
                 userCardID: userCard.id,
                 explanation: explanation,
                 icon: "star.circle.fill",
-                iconColor: urgency == .critical ? "red" : "purple"
+                iconColor: urgency == .critical ? "red" : "purple",
+                expirationDate: bonus.deadline,
+                confidence: .estimated,
+                progress: spendProgress,
+                benefitID: nil
             )
         }
     }
 
-    // MARK: - Priority 3: Activation Required
+    // MARK: - Priority 3: Category Activation
 
-    private static func activationRecommendations(cards: [UserCard]) -> [Recommendation] {
-        cards.compactMap { userCard -> Recommendation? in
+    private static func activationOpportunities(cards: [UserCard]) -> [Opportunity] {
+        cards.compactMap { userCard -> Opportunity? in
             guard let def = userCard.definition,
-                  let activation = def.activationRequired
+                  let activation = def.activationRequired,
+                  userCard.activatedThisPeriod != true
             else { return nil }
 
-            return Recommendation(
+            return Opportunity(
                 id: "activation-\(userCard.id)",
-                type: .activationRequired,
+                type: .categoryActivation,
                 title: "\(def.name) — \(activation)",
                 subtitle: "\(def.issuer) · Action needed",
                 estimatedValue: nil,
@@ -185,16 +155,20 @@ enum RecommendationEngine {
                 userCardID: userCard.id,
                 explanation: "Your \(def.name) requires you to \(activation.lowercased()) to earn bonus rewards.",
                 icon: "bolt.circle.fill",
-                iconColor: "blue"
+                iconColor: "blue",
+                expirationDate: nil,
+                confidence: .verified,
+                progress: nil,
+                benefitID: nil
             )
         }
     }
 
-    // MARK: - Priority 4: Annual Fee Approaching
+    // MARK: - Priority 4: Annual Fee Review
 
-    private static func annualFeeRecommendations(cards: [UserCard], now: Date) -> [Recommendation] {
+    private static func annualFeeOpportunities(cards: [UserCard], now: Date) -> [Opportunity] {
         let cal = Calendar.current
-        return cards.compactMap { userCard -> Recommendation? in
+        return cards.compactMap { userCard -> Opportunity? in
             guard let renewalDate = userCard.renewalDate,
                   let def = userCard.definition
             else { return nil }
@@ -216,11 +190,11 @@ enum RecommendationEngine {
             // "$0 intro, then $95" → first number is 0, skip
             guard feeAmount > 0 else { return nil }
 
-            let urgency: RecommendationUrgency = daysUntil <= 7 ? .high : .medium
+            let urgency: OpportunityUrgency = daysUntil <= 7 ? .high : .medium
 
-            return Recommendation(
+            return Opportunity(
                 id: "fee-\(userCard.id)",
-                type: .annualFeeApproaching,
+                type: .annualFeeReview,
                 title: "\(def.name) — $\(Int(feeAmount)) fee in \(daysUntil) days",
                 subtitle: "\(def.issuer) · Review your card value",
                 estimatedValue: Decimal(feeAmount),
@@ -229,8 +203,171 @@ enum RecommendationEngine {
                 userCardID: userCard.id,
                 explanation: "Your \(def.name) annual fee of $\(Int(feeAmount)) renews in \(daysUntil) days. Make sure you're getting enough value to justify keeping it.",
                 icon: "dollarsign.circle.fill",
-                iconColor: "orange"
+                iconColor: "orange",
+                expirationDate: renewalDate,
+                confidence: .estimated,
+                progress: nil,
+                benefitID: nil
             )
+        }
+    }
+
+    // MARK: - Best Card for Category
+
+    struct CardRewardMatch: Identifiable {
+        let id: String
+        let cardDefinitionID: String
+        let cardName: String
+        let issuer: String
+        let matchedRule: RewardRule
+        let effectiveMultiplier: Double
+        let explanation: String
+        var preferenceNote: String?
+    }
+
+    static func bestCards(
+        for category: SpendingCategory,
+        cards: [UserCard],
+        preferences: Set<RecommendationPreference> = []
+    ) -> [CardRewardMatch] {
+        var matches: [CardRewardMatch] = []
+
+        for userCard in cards {
+            guard let def = userCard.definition else { continue }
+
+            // Find the best matching rule: prefer category-specific over catch-all
+            var bestRule: RewardRule?
+            var isCategoryMatch = false
+
+            for rule in def.rewardRules {
+                if category.matches(rule: rule) && category != .other {
+                    // Direct category match
+                    let multiplier = SpendingCategory.parseMultiplier(rule.multiplier)
+                    let currentBest = bestRule.map { SpendingCategory.parseMultiplier($0.multiplier) } ?? 0
+                    if multiplier > currentBest || !isCategoryMatch {
+                        bestRule = rule
+                        isCategoryMatch = true
+                    }
+                } else if !isCategoryMatch {
+                    // Fall back to "everything" catch-all
+                    let lower = rule.category.lowercased()
+                    if lower.hasPrefix("everything") {
+                        let multiplier = SpendingCategory.parseMultiplier(rule.multiplier)
+                        let currentBest = bestRule.map { SpendingCategory.parseMultiplier($0.multiplier) } ?? 0
+                        if multiplier > currentBest {
+                            bestRule = rule
+                        }
+                    }
+                }
+            }
+
+            guard let rule = bestRule else { continue }
+            let multiplier = SpendingCategory.parseMultiplier(rule.multiplier)
+
+            let explanation: String
+            if isCategoryMatch {
+                explanation = "Earns \(rule.multiplier) on \(rule.category.lowercased()) purchases."
+            } else {
+                explanation = "Earns \(rule.multiplier) on all purchases (no bonus for \(category.label.lowercased()))."
+            }
+
+            matches.append(CardRewardMatch(
+                id: userCard.id,
+                cardDefinitionID: userCard.cardDefinitionID,
+                cardName: "\(def.issuer) \(def.name)",
+                issuer: def.issuer,
+                matchedRule: rule,
+                effectiveMultiplier: multiplier,
+                explanation: explanation
+            ))
+        }
+
+        // Sort by multiplier first
+        var sorted = matches.sorted { $0.effectiveMultiplier > $1.effectiveMultiplier }
+
+        // Apply preference-based re-ranking
+        applyPreferenceModifiers(to: &sorted, category: category, cards: cards, preferences: preferences)
+
+        return sorted
+    }
+
+    // MARK: - Preference Modifiers
+
+    private static func applyPreferenceModifiers(
+        to matches: inout [CardRewardMatch],
+        category: SpendingCategory,
+        cards: [UserCard],
+        preferences: Set<RecommendationPreference>
+    ) {
+        guard !matches.isEmpty else { return }
+
+        // "Prioritize welcome bonuses" — promote cards with active welcome bonus tracking
+        if preferences.contains(.prioritizeWelcomeBonuses) {
+            if let bonusIdx = matches.firstIndex(where: { match in
+                guard let userCard = cards.first(where: { $0.id == match.id }),
+                      let bonus = userCard.welcomeBonus,
+                      bonus.isTracking,
+                      let target = bonus.targetSpend,
+                      let current = bonus.currentSpend,
+                      target - current > 0
+                else { return false }
+                return true
+            }), bonusIdx != 0 {
+                let promoted = matches[bonusIdx]
+                let topCard = matches[0]
+                matches.remove(at: bonusIdx)
+                matches.insert(promoted, at: 0)
+                matches[0].preferenceNote = "Although \(topCard.cardName) earns more on \(category.label.lowercased()), you're currently working toward your \(promoted.cardName) welcome bonus."
+            }
+        }
+
+        // "Use credits before they expire" — promote cards with expiring benefits relevant to category
+        if preferences.contains(.useCreditsBeforeExpiry) {
+            if let expiringIdx = matches.firstIndex(where: { match in
+                guard let userCard = cards.first(where: { $0.id == match.id }),
+                      let def = userCard.definition
+                else { return false }
+                return userCard.benefitStates.contains { state in
+                    guard state.status != .used,
+                          let days = state.daysUntilExpiry,
+                          days >= 0, days <= 7,
+                          let credit = def.statementCredits.first(where: { $0.description == state.id })
+                    else { return false }
+                    // Check if the credit is relevant to this spending category
+                    let creditLower = credit.description.lowercased()
+                    return category.keywords.contains { creditLower.contains($0) }
+                }
+            }) {
+                let userCard = cards.first(where: { $0.id == matches[expiringIdx].id })!
+                let def = userCard.definition!
+                let expiringCredit = userCard.benefitStates.first { state in
+                    guard state.status != .used,
+                          let days = state.daysUntilExpiry,
+                          days >= 0, days <= 7,
+                          let credit = def.statementCredits.first(where: { $0.description == state.id })
+                    else { return false }
+                    let creditLower = credit.description.lowercased()
+                    return category.keywords.contains { creditLower.contains($0) }
+                }
+
+                if expiringIdx != 0 {
+                    let promoted = matches[expiringIdx]
+                    matches.remove(at: expiringIdx)
+                    matches.insert(promoted, at: 0)
+                }
+                if let creditName = expiringCredit?.id {
+                    matches[0].preferenceNote = "Your \(creditName) on \(matches[0].cardName) expires soon — use this card to apply it."
+                }
+            }
+        }
+
+        // "Maximize cashback" / "Maximize travel points" — no re-ranking needed, just explanation text
+        if matches[0].preferenceNote == nil {
+            if preferences.contains(.maximizeCashback) {
+                matches[0].preferenceNote = "Best cashback rate for \(category.label.lowercased())."
+            } else if preferences.contains(.maximizeTravelPoints) {
+                matches[0].preferenceNote = "Best points rate for \(category.label.lowercased())."
+            }
         }
     }
 

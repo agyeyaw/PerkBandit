@@ -99,9 +99,15 @@ enum OnboardingPersistence {
         selectedCards: [String] = [],
         bonusStatuses: [String: String] = [:],
         bonusDetails: [String: WelcomeBonusDetail] = [:],
-        benefitStatuses: [String: String] = [:]
+        benefitStatuses: [String: String] = [:],
+        recommendationPrefs: Set<String> = [],
+        pointValuation: String = "perkbandit"
     ) {
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
+
+        // Save recommendation preferences to UserDefaults
+        UserDefaults.standard.set(Array(recommendationPrefs), forKey: "recommendationPrefs")
+        UserDefaults.standard.set(pointValuation, forKey: "pointValuation")
 
         // Build UserCard array from onboarding data
         let userCards: [UserCard] = selectedCards.compactMap { cardId in
@@ -146,6 +152,8 @@ enum OnboardingPersistence {
         UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
         UserDefaults.standard.removeObject(forKey: "userSelectedCardIDs")
         UserDefaults.standard.removeObject(forKey: "userCards")
+        UserDefaults.standard.removeObject(forKey: "recommendationPrefs")
+        UserDefaults.standard.removeObject(forKey: "pointValuation")
     }
     #endif
 }

@@ -13,6 +13,8 @@ struct HomeView: View {
     @EnvironmentObject var authManager: AuthManager
     @State private var showNotifications = false
     @State private var showProfile = false
+    @State private var showCategoryPicker = false
+    @State private var selectedOpportunity: Opportunity?
     @State private var hasCardDataOverride: Bool? = nil
 
     private var hasCardData: Bool {
@@ -41,19 +43,39 @@ struct HomeView: View {
             .ignoresSafeArea()
 
             ScrollView {
+                let opportunities = cardStore.opportunities
+
                 VStack(spacing: 0) {
                     // Greeting, notification bell, and Scout (on navy background)
                     HomeHeroView(
                         greetingText: greetingText,
-                        opportunityCount: cardStore.recommendations.count,
-                        opportunityValue: cardStore.recommendations.compactMap { $0.estimatedValue }.reduce(0, +),
+                        opportunityCount: opportunities.count,
                         showNotifications: $showNotifications,
                         showProfile: $showProfile
                     )
 
+                    // "Where are you shopping?" button
+                    Button {
+                        showCategoryPicker = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.subheadline.weight(.semibold))
+                            Text("Where are you shopping?")
+                                .font(.subheadline.weight(.semibold))
+                        }
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Capsule().fill(PBTheme.accent))
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 12)
+
                     // Card recommendation on navy
-                    if hasCardData, let top = cardStore.recommendations.first {
-                        RecommendationHeroCard(recommendation: top, cardStore: cardStore)
+                    if hasCardData, let top = opportunities.first {
+                        OpportunityHeroCard(opportunity: top, cardStore: cardStore)
+                            .onTapGesture { selectedOpportunity = top }
                             .padding(.horizontal, 20)
                             .padding(.bottom, 12)
                     } else {
@@ -65,10 +87,18 @@ struct HomeView: View {
 
                     // White content area starts below
                     VStack(alignment: .leading, spacing: 20) {
-                        // Credits expiring + Bonus progress cards
-                        HStack(spacing: 12) {
-                            creditsExpiringCard
-                            bonusProgressCard
+                        // Small opportunity cards (#2 and #3)
+                        let smallOpps = Array(opportunities.dropFirst().prefix(2))
+                        if !smallOpps.isEmpty {
+                            HStack(spacing: 12) {
+                                ForEach(smallOpps) { opp in
+                                    OpportunitySmallCard(opportunity: opp)
+                                        .onTapGesture { selectedOpportunity = opp }
+                                }
+                                if smallOpps.count == 1 {
+                                    Spacer().frame(maxWidth: .infinity)
+                                }
+                            }
                         }
 
                         // More Opportunities header
@@ -87,8 +117,8 @@ struct HomeView: View {
 
                         // Opportunity rows
                         VStack(spacing: 0) {
-                            let moreRecs = Array(cardStore.recommendations.dropFirst().prefix(3))
-                            if moreRecs.isEmpty {
+                            let moreOpps = Array(opportunities.dropFirst(3).prefix(3))
+                            if moreOpps.isEmpty {
                                 OpportunityRow(
                                     icon: "checkmark.circle.fill",
                                     iconColor: PBTheme.positive,
@@ -98,47 +128,20 @@ struct HomeView: View {
                                     trailingColor: .clear
                                 )
                             } else {
-                                ForEach(Array(moreRecs.enumerated()), id: \.element.id) { index, rec in
-                                    RecommendationRow(recommendation: rec)
-                                    if index < moreRecs.count - 1 {
+                                ForEach(Array(moreOpps.enumerated()), id: \.element.id) { index, opp in
+                                    Button {
+                                        selectedOpportunity = opp
+                                    } label: {
+                                        OpportunityListRow(opportunity: opp)
+                                    }
+                                    .buttonStyle(.plain)
+                                    if index < moreOpps.count - 1 {
                                         Divider().padding(.leading, 52)
                                     }
                                 }
                             }
                         }
                         .padding(.vertical, 4)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(Color(.systemBackground))
-                        )
-
-                        // Value captured
-                        HStack {
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Value captured")
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(.secondary)
-                                HStack(alignment: .firstTextBaseline, spacing: 4) {
-                                    Text("$684.32")
-                                        .font(.title2.weight(.bold))
-                                    Text("this year")
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                            }
-
-                            Spacer()
-
-                            VStack(alignment: .trailing, spacing: 4) {
-                                Text("+$49.29")
-                                    .font(.title3.weight(.bold))
-                                    .foregroundStyle(PBTheme.positive)
-                                Text("this month")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                        .padding(16)
                         .background(
                             RoundedRectangle(cornerRadius: 16, style: .continuous)
                                 .fill(Color(.systemBackground))
@@ -158,12 +161,17 @@ struct HomeView: View {
                     .padding(.horizontal, 20)
                     .padding(.top, 24)
                     .background(
-                        UnevenRoundedRectangle(
-                            topLeadingRadius: 24,
-                            topTrailingRadius: 24
-                        )
-                        .fill(Color(red: 245/255, green: 246/255, blue: 250/255))
-                        .shadow(color: .black.opacity(0.15), radius: 12, y: -4)
+                        VStack(spacing: 0) {
+                            UnevenRoundedRectangle(
+                                topLeadingRadius: 24,
+                                topTrailingRadius: 24
+                            )
+                            .fill(Color(red: 245/255, green: 246/255, blue: 250/255))
+                            .shadow(color: .black.opacity(0.15), radius: 12, y: -4)
+
+                            Rectangle()
+                                .fill(Color(red: 245/255, green: 246/255, blue: 250/255))
+                        }
                     )
                 }
             }
@@ -179,111 +187,15 @@ struct HomeView: View {
             ProfileView()
                 .environmentObject(authManager)
         }
-    }
-
-    // MARK: - Credits Expiring Card
-
-    private var creditsExpiringCard: some View {
-        let expiring = cardStore.expiringBenefits
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: "clock.arrow.circlepath")
-                    .font(.caption)
-                    .foregroundStyle(.orange)
-                Text("Credits expiring")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-            }
-
-            if let first = expiring.first {
-                Text(first.credit.description)
-                    .font(.subheadline.weight(.bold))
-                Text(first.benefit.expiryText ?? "")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                HStack(spacing: 4) {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .font(.caption2)
-                        .foregroundStyle(.red)
-                    Text("$\(Int(first.credit.perPeriodAmount)) at risk")
-                        .font(.caption.weight(.medium))
-                        .foregroundStyle(.red)
-                }
-            } else {
-                Text("All clear!")
-                    .font(.subheadline.weight(.bold))
-                Text("No credits expiring soon")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+        .sheet(isPresented: $showCategoryPicker) {
+            SpendingCategorySheet()
+                .environmentObject(cardStore)
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(.systemBackground))
-        )
-    }
-
-    // MARK: - Bonus Progress Card
-
-    private var bonusProgressCard: some View {
-        let activeBonus = cardStore.cards.first { $0.welcomeBonus?.isTracking == true }
-        return VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 6) {
-                Image(systemName: "star.circle.fill")
-                    .font(.caption)
-                    .foregroundStyle(PBTheme.accent)
-                Text("Bonus progress")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
-            }
-
-            if let card = activeBonus, let bonus = card.welcomeBonus,
-               let target = bonus.targetSpend, target > 0 {
-                let current = bonus.currentSpend ?? 0
-                let remaining = max(0, target - current)
-                let progress = min(1.0, current / target)
-                let cardName = card.definition?.name ?? "Card"
-
-                Text("\(cardName) bonus")
-                    .font(.subheadline.weight(.bold))
-                Text("$\(Int(remaining)) left")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-
-                GeometryReader { barGeo in
-                    ZStack(alignment: .leading) {
-                        Capsule()
-                            .fill(Color(.systemGray5))
-                            .frame(height: 6)
-                        Capsule()
-                            .fill(PBTheme.accent)
-                            .frame(width: barGeo.size.width * progress, height: 6)
-                    }
-                }
-                .frame(height: 6)
-
-                Text("$\(Int(current)) / $\(Int(target))")
-                    .font(.caption2)
-                    .foregroundStyle(.secondary)
-            } else {
-                Text("No active bonus")
-                    .font(.subheadline.weight(.bold))
-                Text("Set one up in your card details")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
+        .sheet(item: $selectedOpportunity) { opp in
+            OpportunityActionSheet(opportunity: opp)
+                .environmentObject(cardStore)
         }
-        .padding(14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(
-            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                .fill(Color(.systemBackground))
-        )
     }
-
 }
 
 // MARK: - Top Hero Component
@@ -291,7 +203,6 @@ struct HomeView: View {
 struct HomeHeroView: View {
     let greetingText: String
     let opportunityCount: Int
-    let opportunityValue: Decimal
     @Binding var showNotifications: Bool
     @Binding var showProfile: Bool
     var body: some View {
@@ -313,12 +224,7 @@ struct HomeHeroView: View {
                         + Text("\(opportunityCount)")
                             .foregroundStyle(PBTheme.accent)
                             .fontWeight(.semibold)
-                        + Text(" opportunity\(opportunityCount == 1 ? "" : "s") worth an estimated ")
-                            .foregroundStyle(.white.opacity(0.6))
-                        + Text("$\(NSDecimalNumber(decimal: opportunityValue).stringValue)")
-                            .foregroundStyle(PBTheme.accent)
-                            .fontWeight(.semibold)
-                        + Text(" today.")
+                        + Text(" opportunity\(opportunityCount == 1 ? "" : "s") to check today.")
                             .foregroundStyle(.white.opacity(0.6)))
                             .font(.subheadline)
                     } else {
@@ -449,15 +355,15 @@ struct CardRecommendationCard: View {
     }
 }
 
-// MARK: - Recommendation Hero Card
+// MARK: - Opportunity Hero Card
 
-struct RecommendationHeroCard: View {
-    let recommendation: Recommendation
+struct OpportunityHeroCard: View {
+    let opportunity: Opportunity
     let cardStore: CardStore
     @State private var showExplanation = false
 
     private var cardDef: CreditCard? {
-        guard let defID = recommendation.cardDefinitionID else { return nil }
+        guard let defID = opportunity.cardDefinitionID else { return nil }
         return catalogCard(for: defID)
     }
 
@@ -495,29 +401,29 @@ struct RecommendationHeroCard: View {
                 }
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(recommendation.title)
+                    Text(opportunity.title)
                         .font(.subheadline.weight(.bold))
                         .foregroundStyle(.white)
 
-                    Text(recommendation.subtitle)
+                    Text(opportunity.subtitle)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.5))
                         .lineLimit(2)
                 }
             }
 
-            // Value estimate
-            if let value = recommendation.estimatedValue {
+            // Value estimate (only for expiring benefits where the value is a real credit amount)
+            if opportunity.type == .expiringBenefit, let value = opportunity.estimatedValue {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("+$\(NSDecimalNumber(decimal: value).intValue)")
                         .font(.title.weight(.bold))
                         .foregroundStyle(PBTheme.positive)
 
                     HStack(spacing: 4) {
-                        Image(systemName: "checkmark.seal.fill")
+                        Image(systemName: "clock")
                             .font(.caption2)
                             .foregroundStyle(PBTheme.accent)
-                        Text("Estimated value at risk")
+                        Text("Unclaimed credit expiring")
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.5))
                     }
@@ -526,7 +432,7 @@ struct RecommendationHeroCard: View {
 
             // Explanation
             if showExplanation {
-                Text(recommendation.explanation)
+                Text(opportunity.explanation)
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.6))
                     .padding(10)
@@ -558,6 +464,7 @@ struct RecommendationHeroCard: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(16)
         .background(
             RoundedRectangle(cornerRadius: 20, style: .continuous)
@@ -566,13 +473,139 @@ struct RecommendationHeroCard: View {
     }
 }
 
-// MARK: - Recommendation Row
+// MARK: - Opportunity Small Card
 
-struct RecommendationRow: View {
-    let recommendation: Recommendation
+struct OpportunitySmallCard: View {
+    let opportunity: Opportunity
+
+    private var headerIcon: String {
+        switch opportunity.type {
+        case .expiringBenefit: return "clock.arrow.circlepath"
+        case .welcomeBonus: return "star.circle.fill"
+        case .categoryActivation: return "bolt.circle.fill"
+        case .annualFeeReview: return "dollarsign.circle.fill"
+        case .cardRecommendation: return "creditcard.fill"
+        }
+    }
+
+    private var headerColor: Color {
+        switch opportunity.type {
+        case .expiringBenefit: return .orange
+        case .welcomeBonus: return PBTheme.accent
+        case .categoryActivation: return .blue
+        case .annualFeeReview: return .orange
+        case .cardRecommendation: return PBTheme.accent
+        }
+    }
+
+    private var headerLabel: String {
+        switch opportunity.type {
+        case .expiringBenefit: return "Credits expiring"
+        case .welcomeBonus: return "Bonus progress"
+        case .categoryActivation: return "Activation needed"
+        case .annualFeeReview: return "Annual fee"
+        case .cardRecommendation: return "Recommendation"
+        }
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 6) {
+                Image(systemName: headerIcon)
+                    .font(.caption)
+                    .foregroundStyle(headerColor)
+                Text(headerLabel)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+
+            switch opportunity.type {
+            case .expiringBenefit:
+                expiringBenefitBody
+            case .welcomeBonus:
+                welcomeBonusBody
+            default:
+                defaultBody
+            }
+        }
+        .padding(14)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            RoundedRectangle(cornerRadius: 16, style: .continuous)
+                .fill(Color(.systemBackground))
+        )
+    }
+
+    private var expiringBenefitBody: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(opportunity.title)
+                .font(.subheadline.weight(.bold))
+                .lineLimit(2)
+            Text(opportunity.urgency.label)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            if let value = opportunity.estimatedValue {
+                HStack(spacing: 4) {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.caption2)
+                        .foregroundStyle(.red)
+                    Text("$\(NSDecimalNumber(decimal: value).intValue) credit expiring")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(.red)
+                }
+            }
+        }
+    }
+
+    private var welcomeBonusBody: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(opportunity.title)
+                .font(.subheadline.weight(.bold))
+                .lineLimit(2)
+            Text(opportunity.subtitle)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
+            if let progress = opportunity.progress {
+                GeometryReader { barGeo in
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(Color(.systemGray5))
+                            .frame(height: 6)
+                        Capsule()
+                            .fill(PBTheme.accent)
+                            .frame(width: barGeo.size.width * progress, height: 6)
+                    }
+                }
+                .frame(height: 6)
+
+                Text("\(Int(progress * 100))% complete")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private var defaultBody: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(opportunity.title)
+                .font(.subheadline.weight(.bold))
+                .lineLimit(2)
+            Text(opportunity.subtitle)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+    }
+}
+
+// MARK: - Opportunity List Row
+
+struct OpportunityListRow: View {
+    let opportunity: Opportunity
 
     private var color: Color {
-        switch recommendation.iconColor {
+        switch opportunity.iconColor {
         case "red": return .red
         case "orange": return .orange
         case "blue": return PBTheme.accent
@@ -583,11 +616,11 @@ struct RecommendationRow: View {
 
     var body: some View {
         OpportunityRow(
-            icon: recommendation.icon,
+            icon: opportunity.icon,
             iconColor: color,
-            title: recommendation.title,
-            subtitle: recommendation.subtitle,
-            trailingText: recommendation.urgency.label,
+            title: opportunity.title,
+            subtitle: opportunity.subtitle,
+            trailingText: opportunity.urgency.label,
             trailingColor: color
         )
     }

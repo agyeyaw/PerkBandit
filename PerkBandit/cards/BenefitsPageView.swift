@@ -5,42 +5,37 @@
 
 import SwiftUI
 
-// MARK: - Models
-
-enum BenefitStatus: String, CaseIterable {
-    case available = "Available"
-    case used = "Used"
-    case expiring = "Expiring"
-}
-
-struct MockBenefit: Identifiable {
-    let id = UUID()
-    let title: String
-    let icon: String
-    let frequency: String
-    let status: BenefitStatus
-    let detailText: String?
-    let amountRemaining: Double?
-}
-
 // MARK: - View
 
 struct BenefitsPageView: View {
+    let cardDefinitionID: String
+    @EnvironmentObject var cardStore: CardStore
     @State private var selectedFilter: String = "All"
     private let filters = ["All", "Available", "Used", "Expiring"]
 
-    private let benefits: [MockBenefit] = [
-        MockBenefit(title: "Streaming Credit", icon: "play.tv", frequency: "Monthly", status: .available, detailText: "$15 remaining", amountRemaining: 15),
-        MockBenefit(title: "Dining Credit", icon: "fork.knife", frequency: "Monthly", status: .available, detailText: "$25 remaining", amountRemaining: 25),
-        MockBenefit(title: "Travel Credit", icon: "airplane", frequency: "Annual", status: .used, detailText: nil, amountRemaining: 0),
-        MockBenefit(title: "TSA PreCheck", icon: "person.badge.shield.checkmark", frequency: "Every 4 years", status: .used, detailText: nil, amountRemaining: 0),
-        MockBenefit(title: "Uber Cash", icon: "car.fill", frequency: "Monthly", status: .expiring, detailText: "Exp. in 5 days", amountRemaining: 15),
-        MockBenefit(title: "Hotel Credit", icon: "building.2", frequency: "Annual", status: .available, detailText: "$40 remaining", amountRemaining: 40),
-    ]
+    private var userCard: UserCard? {
+        cardStore.cards.first { $0.cardDefinitionID == cardDefinitionID }
+    }
 
-    private var filteredBenefits: [MockBenefit] {
-        if selectedFilter == "All" { return benefits }
-        return benefits.filter { $0.status.rawValue == selectedFilter }
+    private var catalogCard: CreditCard? {
+        PerkBandit.catalogCard(for: cardDefinitionID)
+    }
+
+    private var pairedBenefits: [(state: UserBenefitState, credit: StatementCredit)] {
+        guard let uc = userCard, let def = catalogCard else { return [] }
+        return uc.benefitStates.compactMap { state in
+            guard let credit = def.statementCredits.first(where: { $0.description == state.id }) else { return nil }
+            return (state, credit)
+        }
+    }
+
+    private var filteredBenefits: [(state: UserBenefitState, credit: StatementCredit)] {
+        switch selectedFilter {
+        case "Available": return pairedBenefits.filter { $0.state.status == .available }
+        case "Used": return pairedBenefits.filter { $0.state.status == .used }
+        case "Expiring": return pairedBenefits.filter { $0.state.isExpiringSoon }
+        default: return pairedBenefits
+        }
     }
 
     var body: some View {
@@ -53,20 +48,27 @@ struct BenefitsPageView: View {
 
                 ScrollView {
                     LazyVStack(spacing: 12) {
-                        ForEach(filteredBenefits) { benefit in
-                            benefitRow(benefit)
+                        ForEach(filteredBenefits, id: \.state.id) { pair in
+                            benefitRow(pair.state, pair.credit)
+                                .onTapGesture {
+                                    if let uc = userCard {
+                                        cardStore.toggleBenefitStatus(
+                                            userCardID: uc.id,
+                                            benefitID: pair.state.id
+                                        )
+                                    }
+                                }
                         }
                     }
                     .padding(.horizontal)
 
-                    Text("Last confirmed by you 8 days ago")
-                        .font(.caption)
-                        .foregroundStyle(PBTheme.subtitleGray)
-                        .padding(.top, 20)
-                        .padding(.bottom, 12)
+                    if pairedBenefits.isEmpty {
+                        Text("No benefits for this card")
+                            .font(.subheadline)
+                            .foregroundStyle(PBTheme.subtitleGray)
+                            .padding(.top, 40)
+                    }
                 }
-
-                PBBottomButton(title: "Update Status")
             }
         }
     }
@@ -97,24 +99,24 @@ struct BenefitsPageView: View {
 
     // MARK: - Benefit Row
 
-    private func benefitRow(_ benefit: MockBenefit) -> some View {
+    private func benefitRow(_ state: UserBenefitState, _ credit: StatementCredit) -> some View {
         HStack(spacing: 14) {
             // Icon
             Circle()
                 .fill(PBTheme.accent.opacity(0.15))
                 .frame(width: 44, height: 44)
                 .overlay(
-                    Image(systemName: benefit.icon)
+                    Image(systemName: iconForBenefit(credit.description))
                         .font(.system(size: 18))
                         .foregroundStyle(PBTheme.accent)
                 )
 
             // Title + frequency
             VStack(alignment: .leading, spacing: 3) {
-                Text(benefit.title)
+                Text(credit.description)
                     .font(.subheadline.weight(.semibold))
                     .foregroundStyle(.white)
-                Text(benefit.frequency)
+                Text("\(credit.frequency.label) · $\(Int(credit.perPeriodAmount))")
                     .font(.caption)
                     .foregroundStyle(PBTheme.subtitleGray)
             }
@@ -123,9 +125,9 @@ struct BenefitsPageView: View {
 
             // Status + detail
             VStack(alignment: .trailing, spacing: 4) {
-                statusPill(benefit.status)
-                if let detail = benefit.detailText {
-                    Text(detail)
+                statusPill(state)
+                if state.isExpiringSoon, let text = state.expiryText {
+                    Text(text)
                         .font(.caption2)
                         .foregroundStyle(PBTheme.subtitleGray)
                 }
@@ -138,26 +140,40 @@ struct BenefitsPageView: View {
         )
     }
 
-    private func statusPill(_ status: BenefitStatus) -> some View {
-        let color: Color = {
-            switch status {
-            case .available: return PBTheme.positive
-            case .used: return PBTheme.subtitleGray
-            case .expiring: return PBTheme.negative
+    private func statusPill(_ state: UserBenefitState) -> some View {
+        let (label, color): (String, Color) = {
+            if state.isExpiringSoon { return ("Expiring", PBTheme.negative) }
+            switch state.status {
+            case .available: return ("Available", PBTheme.positive)
+            case .used: return ("Used", PBTheme.subtitleGray)
+            case .notSure: return ("Not Sure", .orange)
             }
         }()
 
-        return Text(status.rawValue)
+        return Text(label)
             .font(.caption2.weight(.semibold))
             .padding(.horizontal, 10)
             .padding(.vertical, 4)
             .background(Capsule().fill(color.opacity(0.2)))
             .foregroundStyle(color)
     }
+
+    private func iconForBenefit(_ description: String) -> String {
+        let lower = description.lowercased()
+        if lower.contains("uber") { return "car.fill" }
+        if lower.contains("dining") { return "fork.knife" }
+        if lower.contains("travel") { return "airplane" }
+        if lower.contains("hotel") { return "building.2" }
+        if lower.contains("streaming") || lower.contains("entertainment") || lower.contains("digital") { return "play.tv" }
+        if lower.contains("saks") { return "bag.fill" }
+        if lower.contains("airline") { return "airplane.departure" }
+        return "creditcard.fill"
+    }
 }
 
 #Preview {
     NavigationStack {
-        BenefitsPageView()
+        BenefitsPageView(cardDefinitionID: "amex-platinum")
+            .environmentObject(CardStore())
     }
 }

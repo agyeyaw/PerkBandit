@@ -166,6 +166,7 @@ struct UserOnboardingFlowView: View {
         case .benefitStatus:
             BenefitStatusStepView(
                 setupMethod: state.setupMethod,
+                selectedCards: state.selectedCards,
                 benefitStatuses: $state.benefitStatuses,
                 onAdvance: { advance(to: .recommendationPrefs) }
             )
@@ -209,7 +210,12 @@ struct UserOnboardingFlowView: View {
 
         case .completion:
             CompletionStepView(onAdvance: {
-                OnboardingPersistence.markCompleted(selectedCards: state.selectedCards)
+                OnboardingPersistence.markCompleted(
+                    selectedCards: state.selectedCards,
+                    bonusStatuses: state.cardBonusStatuses,
+                    bonusDetails: state.cardBonusDetails,
+                    benefitStatuses: state.benefitStatuses
+                )
                 let capturedState = state
                 Task { await UserProfileService.saveOnboardingData(capturedState) }
                 cardStore.reload()

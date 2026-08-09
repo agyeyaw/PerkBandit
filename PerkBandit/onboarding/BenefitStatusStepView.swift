@@ -7,18 +7,17 @@ import SwiftUI
 
 private let navyColor = Color(red: 24/255, green: 32/255, blue: 51/255)
 
-private let mockBenefits = [
-    "$10 Uber Cash",
-    "$10 Dining Credit",
-    "$200 Travel Credit",
-    "Priority Pass",
-    "Hotel credit",
-]
-
 struct BenefitStatusStepView: View {
     let setupMethod: SetupMethod?
+    let selectedCards: [String]
     @Binding var benefitStatuses: [String: String]
     let onAdvance: () -> Void
+
+    private var realBenefits: [String] {
+        selectedCards.flatMap { cardId in
+            catalogCard(for: cardId)?.statementCredits.map(\.description) ?? []
+        }
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -84,25 +83,32 @@ struct BenefitStatusStepView: View {
                     }
                     .padding(.top, 8)
 
-                    VStack(spacing: 0) {
-                        ForEach(mockBenefits, id: \.self) { benefit in
-                            BenefitRow(
-                                benefit: benefit,
-                                status: Binding(
-                                    get: { benefitStatuses[benefit] ?? "available" },
-                                    set: { benefitStatuses[benefit] = $0 }
+                    if realBenefits.isEmpty {
+                        Text("None of your selected cards have statement credits to track.")
+                            .font(.system(size: 15))
+                            .foregroundColor(.secondary)
+                            .padding(.top, 8)
+                    } else {
+                        VStack(spacing: 0) {
+                            ForEach(realBenefits, id: \.self) { benefit in
+                                BenefitRow(
+                                    benefit: benefit,
+                                    status: Binding(
+                                        get: { benefitStatuses[benefit] ?? "available" },
+                                        set: { benefitStatuses[benefit] = $0 }
+                                    )
                                 )
-                            )
 
-                            if benefit != mockBenefits.last {
-                                Divider().padding(.leading, 16)
+                                if benefit != realBenefits.last {
+                                    Divider().padding(.leading, 16)
+                                }
                             }
                         }
+                        .background(
+                            RoundedRectangle(cornerRadius: 14, style: .continuous)
+                                .fill(Color(.systemGray6))
+                        )
                     }
-                    .background(
-                        RoundedRectangle(cornerRadius: 14, style: .continuous)
-                            .fill(Color(.systemGray6))
-                    )
 
                     Text("You can review the rest later.")
                         .font(.system(size: 13))

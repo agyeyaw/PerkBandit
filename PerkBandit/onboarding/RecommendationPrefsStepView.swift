@@ -34,7 +34,7 @@ struct RecommendationPrefsStepView: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("How should Scout choose your best card?")
+                Text("How should PerkBandit choose your best card?")
                     .font(.system(size: 24, weight: .bold))
                     .frame(maxWidth: .infinity, alignment: .leading)
                 Text("Select as many as you'd like, or skip for now.")

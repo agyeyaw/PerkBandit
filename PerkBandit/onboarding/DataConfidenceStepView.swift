@@ -14,14 +14,14 @@ struct DataConfidenceStepView: View {
         ("checkmark.seal.fill", "Verified", "Automatically confirmed"),
         ("hand.raised.fill", "Manually tracked", "Information provided by you"),
         ("chart.line.uptrend.xyaxis", "Estimated", "Calculated from available data"),
-        ("exclamationmark.triangle.fill", "Needs confirmation", "Scout needs your help"),
+        ("exclamationmark.triangle.fill", "Needs confirmation", "PerkBandit needs your help"),
     ]
 
     var body: some View {
         VStack(spacing: 0) {
             Spacer()
 
-            Text("Scout always shows what it knows")
+            Text("PerkBandit always shows what it knows")
                 .font(.system(size: 24, weight: .bold))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 24)

@@ -21,7 +21,7 @@ struct ConfirmCardsStepView: View {
                         Text("Does everything look right?")
                             .font(.system(size: 28, weight: .bold))
 
-                        Text("Scout will use these cards to find rewards, benefits, and the best card for each purchase.")
+                        Text("PerkBandit will use these cards to find rewards, benefits, and the best card for each purchase.")
                             .font(.system(size: 17))
                             .foregroundColor(.secondary)
                     }

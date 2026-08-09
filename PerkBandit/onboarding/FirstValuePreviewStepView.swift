@@ -17,7 +17,7 @@ struct FirstValuePreviewStepView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Scout found your first opportunities")
+                        Text("PerkBandit found your first opportunities")
                             .font(.system(size: 24, weight: .bold))
 
                         Text(sourceLabel)

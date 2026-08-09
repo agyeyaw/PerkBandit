@@ -20,7 +20,7 @@ struct WelcomeBonusStepView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Are you working toward a welcome bonus?")
                             .font(.system(size: 24, weight: .bold))
-                        Text("Scout can help you hit your spending targets on time.")
+                        Text("PerkBandit can help you hit your spending targets on time.")
                             .font(.system(size: 15))
                             .foregroundColor(.secondary)
                     }
@@ -42,7 +42,7 @@ struct WelcomeBonusStepView: View {
                         }
                     }
 
-                    Text("Scout will calculate how much you need to spend each month to stay on track.")
+                    Text("PerkBandit will calculate how much you need to spend each month to stay on track.")
                         .font(.system(size: 13))
                         .foregroundColor(.secondary)
                         .padding(.top, 4)

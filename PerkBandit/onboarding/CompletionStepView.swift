@@ -30,7 +30,7 @@ struct CompletionStepView: View {
 
             Spacer().frame(height: 12)
 
-            Text("Let's see what opportunities Scout can find today.")
+            Text("Let's see what opportunities PerkBandit can find today.")
                 .font(.system(size: 17))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

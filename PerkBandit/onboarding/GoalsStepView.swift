@@ -23,7 +23,7 @@ struct GoalsStepView: View {
                 Text("What brings you to PerkBandit?")
                     .font(.system(size: 24, weight: .bold))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text("Tell Scout what matters most.")
+                Text("Tell PerkBandit what matters most.")
                     .font(.system(size: 15)).foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }

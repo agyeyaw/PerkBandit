@@ -19,12 +19,12 @@ private let pages: [OnboardingPage] = [
     OnboardingPage(
         imageName: "AppLogo",
         title: "Welcome to PerkBandit",
-        description: "Never miss another reward, credit, or perk. Scout helps you uncover the hidden value in every card."
+        description: "Never miss another reward, credit, or perk. PerkBandit helps you uncover the hidden value in every card."
     ),
     OnboardingPage(
         imageName: "OnboardingCredit",
         title: "Never miss another credit",
-        description: "Scout keeps track of every benefit so you don't leave money on the table."
+        description: "PerkBandit keeps track of every benefit so you don't leave money on the table."
     ),
     OnboardingPage(
         imageName: "OnboardingCards",
@@ -33,7 +33,7 @@ private let pages: [OnboardingPage] = [
     ),
     OnboardingPage(
         imageName: "OnboardingScout",
-        title: "Scout tells you what to do- not just what you own",
+        title: "PerkBandit tells you what to do— not just what you own",
         description: "Get simple, personalized recommendations based on your cards, spending, and available benefits."
     ),
     OnboardingPage(

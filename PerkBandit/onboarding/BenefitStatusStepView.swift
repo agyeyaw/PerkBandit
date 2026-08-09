@@ -54,11 +54,11 @@ struct BenefitStatusStepView: View {
 
     private var syncedUserView: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("Help Scout understand your benefits")
+            Text("Help PerkBandit understand your benefits")
                 .font(.system(size: 24, weight: .bold))
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-            Text("Scout will look for benefit usage automatically. You can confirm anything uncertain later.")
+            Text("PerkBandit will look for benefit usage automatically. You can confirm anything uncertain later.")
                 .font(.system(size: 15))
                 .foregroundColor(.secondary)
 
@@ -75,7 +75,7 @@ struct BenefitStatusStepView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Help Scout understand your benefits")
+                        Text("Help PerkBandit understand your benefits")
                             .font(.system(size: 24, weight: .bold))
                         Text("Mark anything you've already used this month or year.")
                             .font(.system(size: 15))

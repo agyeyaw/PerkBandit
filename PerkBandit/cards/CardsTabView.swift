@@ -20,50 +20,41 @@ struct CardsTabView: View {
                 Color(red: 202/255, green: 202/255, blue: 202/255)
                     .ignoresSafeArea()
 
-                ScrollView {
-                    VStack(spacing: 0) {
-                        // Header
-                        HStack(alignment: .top) {
-                            VStack(alignment: .leading, spacing: 0) {
-                                Text("Manage")
-                                    .font(.system(size: 40, weight: .bold))
-                                    .foregroundStyle(.black)
-                                Text("Your Cards")
-                                    .font(.system(size: 37, weight: .light))
-                                    .foregroundStyle(.gray)
-                            }
-
-                            Spacer()
-
-                            VStack(spacing: 4) {
-                                Image(systemName: "plus.circle.fill")
-                                    .font(.title2)
-                                    .foregroundStyle(.white, .black)
-                                Text("Add Card")
-                                    .font(.caption)
-                                    .foregroundStyle(.black)
-                            }
+                VStack(spacing: 0) {
+                    // Header
+                    HStack(alignment: .top) {
+                        VStack(alignment: .leading, spacing: 0) {
+                            Text("Manage")
+                                .font(.system(size: 40, weight: .bold))
+                                .foregroundStyle(.black)
+                            Text("Your Cards")
+                                .font(.system(size: 37, weight: .light))
+                                .foregroundStyle(.gray)
                         }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 10)
-                        .padding(.bottom, 20)
 
-                        // Card list
-                        LazyVStack(spacing: 12) {
-                            ForEach(cardStore.cards) { userCard in
-                                if let card = userCard.definition {
-                                    Button {
-                                        path.append(userCard.id)
-                                    } label: {
-                                        CardRowView(userCard: userCard, card: card)
-                                    }
-                                    .buttonStyle(.plain)
-                                }
-                            }
+                        Spacer()
+
+                        VStack(spacing: 4) {
+                            Image(systemName: "plus.circle.fill")
+                                .font(.title2)
+                                .foregroundStyle(.white, .black)
+                            Text("Add Card")
+                                .font(.caption)
+                                .foregroundStyle(.black)
                         }
-                        .padding(.horizontal, 16)
-                        .padding(.bottom, 20)
                     }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
+                    .padding(.bottom, 20)
+
+                    Spacer()
+
+                    // Card deck
+                    CardDeckView(cards: cardStore.cards) { userCardID in
+                        path.append(userCardID)
+                    }
+
+                    Spacer()
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
@@ -80,6 +71,87 @@ struct CardsTabView: View {
                 }
             }
         }
+    }
+}
+
+// MARK: - Card Deck
+
+private struct CardDeckView: View {
+    let cards: [UserCard]
+    let onCardTapped: (String) -> Void
+
+    @State private var currentIndex: Int = 0
+    @GestureState private var dragOffset: CGFloat = 0
+
+    private let cardSpacing: CGFloat = 35
+    private let scaleStep: CGFloat = 0.05
+    private let maxVisible: Int = 3
+
+    var body: some View {
+        let validCards = cards.filter { $0.definition != nil }
+
+        ZStack {
+            ForEach(Array(validCards.enumerated()), id: \.element.id) { index, userCard in
+                let offset = circularOffset(from: currentIndex, to: index, count: validCards.count)
+                if abs(offset) <= maxVisible {
+                    if let card = userCard.definition {
+                        cardView(card: card, userCard: userCard, offset: offset)
+                    }
+                }
+            }
+        }
+        .frame(height: 320)
+        .gesture(
+            DragGesture()
+                .updating($dragOffset) { value, state, _ in
+                    state = value.translation.height
+                }
+                .onEnded { value in
+                    let threshold: CGFloat = 50
+                    let count = cards.filter { $0.definition != nil }.count
+                    guard count > 0 else { return }
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        if value.translation.height < -threshold {
+                            currentIndex = (currentIndex + 1) % count
+                        } else if value.translation.height > threshold {
+                            currentIndex = (currentIndex - 1 + count) % count
+                        }
+                    }
+                }
+        )
+        .padding(.horizontal, 20)
+    }
+
+    private func circularOffset(from current: Int, to index: Int, count: Int) -> Int {
+        let raw = index - current
+        let half = count / 2
+        if raw > half { return raw - count }
+        if raw < -half { return raw + count }
+        return raw
+    }
+
+    private func cardView(card: CreditCard, userCard: UserCard, offset: Int) -> some View {
+        let yShift = CGFloat(offset) * cardSpacing + dragOffset * 0.3
+        let scale = 1.0 - abs(CGFloat(offset)) * scaleStep
+        let cardOpacity = offset == 0 ? 1.0 : max(0.3, 1.0 - abs(CGFloat(offset)) * 0.15)
+
+        return CreditCardVisual(card: card)
+            .frame(maxWidth: .infinity)
+            .shadow(color: .black.opacity(offset == 0 ? 0.2 : 0.1), radius: offset == 0 ? 12 : 6, y: 4)
+            .scaleEffect(max(scale, 0.8))
+            .offset(y: yShift)
+            .opacity(cardOpacity)
+            .zIndex(Double(-abs(offset)))
+            .onTapGesture {
+                if offset == 0 {
+                    onCardTapped(userCard.id)
+                } else {
+                    let count = cards.filter { $0.definition != nil }.count
+                    withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
+                        currentIndex = (currentIndex + offset + count) % count
+                    }
+                }
+            }
     }
 }
 

@@ -20,10 +20,10 @@ struct PointValuationStepView: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(alignment: .leading, spacing: 8) {
-                Text("How should Scout value your points?")
+                Text("How should PerkBandit value your points?")
                     .font(.system(size: 24, weight: .bold))
                     .frame(maxWidth: .infinity, alignment: .leading)
-                Text("This affects how Scout compares card rewards.")
+                Text("This affects how PerkBandit compares card rewards.")
                     .font(.system(size: 15)).foregroundColor(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }

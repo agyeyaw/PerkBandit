@@ -33,7 +33,7 @@ struct NotificationsStepView: View {
 
             Spacer().frame(height: 12)
 
-            Text("Scout can remind you before valuable opportunities expire.")
+            Text("PerkBandit can remind you before valuable opportunities expire.")
                 .font(.system(size: 15))
                 .foregroundColor(.secondary)
                 .multilineTextAlignment(.center)

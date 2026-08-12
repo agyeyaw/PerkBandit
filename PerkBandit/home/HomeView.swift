@@ -15,11 +15,8 @@ struct HomeView: View {
     @State private var showProfile = false
     @State private var showCategoryPicker = false
     @State private var selectedOpportunity: Opportunity?
-    @State private var hasCardDataOverride: Bool? = nil
-
-    private var hasCardData: Bool {
-        hasCardDataOverride ?? cardStore.isUserSelected
-    }
+    @State private var showAddCard = false
+    @State private var showHowItWorks = false
 
     private var firstName: String {
         authManager.user?.displayName ?? "there"
@@ -50,129 +47,16 @@ struct HomeView: View {
                     HomeHeroView(
                         greetingText: greetingText,
                         opportunityCount: opportunities.count,
+                        hasCards: cardStore.hasCards,
                         showNotifications: $showNotifications,
                         showProfile: $showProfile
                     )
 
-                    // "Where are you shopping?" button
-                    Button {
-                        showCategoryPicker = true
-                    } label: {
-                        HStack(spacing: 8) {
-                            Image(systemName: "magnifyingglass")
-                                .font(.subheadline.weight(.semibold))
-                            Text("Where are you shopping?")
-                                .font(.subheadline.weight(.semibold))
-                        }
-                        .foregroundStyle(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                        .background(Capsule().fill(PBTheme.accent))
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 12)
-
-                    // Card recommendation on navy
-                    if hasCardData, let top = opportunities.first {
-                        OpportunityHeroCard(opportunity: top, cardStore: cardStore)
-                            .onTapGesture { selectedOpportunity = top }
-                            .padding(.horizontal, 20)
-                            .padding(.bottom, 12)
+                    if cardStore.hasCards {
+                        cardAwareBody(opportunities: opportunities)
                     } else {
-                        CardRecommendationCard(onViewCards: onViewCards)
-                            .padding(.horizontal, 20)
-                            .padding(.bottom, 12)
+                        zeroCardBody
                     }
-
-
-                    // White content area starts below
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Small opportunity cards (#2 and #3)
-                        let smallOpps = Array(opportunities.dropFirst().prefix(2))
-                        if !smallOpps.isEmpty {
-                            HStack(spacing: 12) {
-                                ForEach(smallOpps) { opp in
-                                    OpportunitySmallCard(opportunity: opp)
-                                        .onTapGesture { selectedOpportunity = opp }
-                                }
-                                if smallOpps.count == 1 {
-                                    Spacer().frame(maxWidth: .infinity)
-                                }
-                            }
-                        }
-
-                        // More Opportunities header
-                        HStack {
-                            Text("More Opportunities")
-                                .font(.title3.weight(.bold))
-                            Spacer()
-                            Button {
-                                // See all action
-                            } label: {
-                                Text("See all")
-                                    .font(.caption.weight(.medium))
-                                    .foregroundStyle(PBTheme.accent)
-                            }
-                        }
-
-                        // Opportunity rows
-                        VStack(spacing: 0) {
-                            let moreOpps = Array(opportunities.dropFirst(3).prefix(3))
-                            if moreOpps.isEmpty {
-                                OpportunityRow(
-                                    icon: "checkmark.circle.fill",
-                                    iconColor: PBTheme.positive,
-                                    title: "No urgent actions",
-                                    subtitle: "All benefits are on track",
-                                    trailingText: "",
-                                    trailingColor: .clear
-                                )
-                            } else {
-                                ForEach(Array(moreOpps.enumerated()), id: \.element.id) { index, opp in
-                                    Button {
-                                        selectedOpportunity = opp
-                                    } label: {
-                                        OpportunityListRow(opportunity: opp)
-                                    }
-                                    .buttonStyle(.plain)
-                                    if index < moreOpps.count - 1 {
-                                        Divider().padding(.leading, 52)
-                                    }
-                                }
-                            }
-                        }
-                        .padding(.vertical, 4)
-                        .background(
-                            RoundedRectangle(cornerRadius: 16, style: .continuous)
-                                .fill(Color(.systemBackground))
-                        )
-
-                        // DEBUG: Toggle card data state override
-                        Toggle(isOn: Binding(
-                            get: { hasCardData },
-                            set: { hasCardDataOverride = $0 }
-                        )) {
-                            Text("Has Card Data")
-                                .font(.caption.weight(.medium))
-                                .foregroundStyle(.gray)
-                        }
-                        .padding(.bottom, 40)
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 24)
-                    .background(
-                        VStack(spacing: 0) {
-                            UnevenRoundedRectangle(
-                                topLeadingRadius: 24,
-                                topTrailingRadius: 24
-                            )
-                            .fill(Color(red: 245/255, green: 246/255, blue: 250/255))
-                            .shadow(color: .black.opacity(0.15), radius: 12, y: -4)
-
-                            Rectangle()
-                                .fill(Color(red: 245/255, green: 246/255, blue: 250/255))
-                        }
-                    )
                 }
             }
         }
@@ -195,6 +79,234 @@ struct HomeView: View {
             OpportunityActionSheet(opportunity: opp)
                 .environmentObject(cardStore)
         }
+        .sheet(isPresented: $showAddCard) {
+            AddCardSheet()
+                .environmentObject(cardStore)
+        }
+        .sheet(isPresented: $showHowItWorks) {
+            HowItWorksView()
+        }
+    }
+
+    // MARK: - Card-Aware Body
+
+    @ViewBuilder
+    private func cardAwareBody(opportunities: [Opportunity]) -> some View {
+        // "Where are you shopping?" button
+        Button {
+            showCategoryPicker = true
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .font(.subheadline.weight(.semibold))
+                Text("Where are you shopping?")
+                    .font(.subheadline.weight(.semibold))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(Capsule().fill(PBTheme.accent))
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 12)
+
+        // Opportunity hero card
+        if let top = opportunities.first {
+            OpportunityHeroCard(opportunity: top, cardStore: cardStore)
+                .onTapGesture { selectedOpportunity = top }
+                .padding(.horizontal, 20)
+                .padding(.bottom, 12)
+        }
+
+        // White content area
+        VStack(alignment: .leading, spacing: 20) {
+            // Small opportunity cards (#2 and #3)
+            let smallOpps = Array(opportunities.dropFirst().prefix(2))
+            if !smallOpps.isEmpty {
+                HStack(spacing: 12) {
+                    ForEach(smallOpps) { opp in
+                        OpportunitySmallCard(opportunity: opp)
+                            .onTapGesture { selectedOpportunity = opp }
+                    }
+                    if smallOpps.count == 1 {
+                        Spacer().frame(maxWidth: .infinity)
+                    }
+                }
+            }
+
+            // More Opportunities header
+            HStack {
+                Text("More Opportunities")
+                    .font(.title3.weight(.bold))
+                Spacer()
+                Button {
+                    // See all action
+                } label: {
+                    Text("See all")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(PBTheme.accent)
+                }
+            }
+
+            // Opportunity rows
+            VStack(spacing: 0) {
+                let moreOpps = Array(opportunities.dropFirst(3).prefix(3))
+                if moreOpps.isEmpty {
+                    OpportunityRow(
+                        icon: "checkmark.circle.fill",
+                        iconColor: PBTheme.positive,
+                        title: "No urgent actions",
+                        subtitle: "All benefits are on track",
+                        trailingText: "",
+                        trailingColor: .clear
+                    )
+                } else {
+                    ForEach(Array(moreOpps.enumerated()), id: \.element.id) { index, opp in
+                        Button {
+                            selectedOpportunity = opp
+                        } label: {
+                            OpportunityListRow(opportunity: opp)
+                        }
+                        .buttonStyle(.plain)
+                        if index < moreOpps.count - 1 {
+                            Divider().padding(.leading, 52)
+                        }
+                    }
+                }
+            }
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(.systemBackground))
+            )
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 24)
+        .padding(.bottom, 40)
+        .background(
+            VStack(spacing: 0) {
+                UnevenRoundedRectangle(
+                    topLeadingRadius: 24,
+                    topTrailingRadius: 24
+                )
+                .fill(Color(red: 245/255, green: 246/255, blue: 250/255))
+                .shadow(color: .black.opacity(0.15), radius: 12, y: -4)
+
+                Rectangle()
+                    .fill(Color(red: 245/255, green: 246/255, blue: 250/255))
+            }
+        )
+    }
+
+    // MARK: - Zero-Card Body
+
+    @ViewBuilder
+    private var zeroCardBody: some View {
+        // "Add Your First Card" CTA
+        Button {
+            showAddCard = true
+        } label: {
+            HStack(spacing: 8) {
+                Image(systemName: "plus.circle.fill")
+                    .font(.subheadline.weight(.semibold))
+                Text("Add Your First Card")
+                    .font(.subheadline.weight(.semibold))
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 14)
+            .background(Capsule().fill(PBTheme.accent))
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 12)
+
+        // Zero-card hero card
+        ZeroCardHeroCard(
+            onAddCard: { showAddCard = true },
+            onHowItWorks: { showHowItWorks = true }
+        )
+        .padding(.horizontal, 20)
+        .padding(.bottom, 12)
+
+        // White content area — Get Started
+        VStack(alignment: .leading, spacing: 20) {
+            Text("Get Started")
+                .font(.title3.weight(.bold))
+
+            VStack(spacing: 0) {
+                Button { showAddCard = true } label: {
+                    getStartedRow(
+                        icon: "creditcard.fill",
+                        iconColor: PBTheme.accent,
+                        title: "Add your first card",
+                        subtitle: "Get personalized recommendations, benefit tracking, and reminders."
+                    )
+                }
+                .buttonStyle(.plain)
+
+                Divider().padding(.leading, 52)
+
+                Button { showHowItWorks = true } label: {
+                    getStartedRow(
+                        icon: "lightbulb.fill",
+                        iconColor: .orange,
+                        title: "See how PerkBandit works",
+                        subtitle: "Preview how card recommendations and opportunities work."
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+            .background(
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color(.systemBackground))
+            )
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 24)
+        .padding(.bottom, 40)
+        .background(
+            VStack(spacing: 0) {
+                UnevenRoundedRectangle(
+                    topLeadingRadius: 24,
+                    topTrailingRadius: 24
+                )
+                .fill(Color(red: 245/255, green: 246/255, blue: 250/255))
+                .shadow(color: .black.opacity(0.15), radius: 12, y: -4)
+
+                Rectangle()
+                    .fill(Color(red: 245/255, green: 246/255, blue: 250/255))
+            }
+        )
+    }
+
+    private func getStartedRow(icon: String, iconColor: Color, title: String, subtitle: String) -> some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(iconColor.opacity(0.12))
+                .frame(width: 36, height: 36)
+                .overlay(
+                    Image(systemName: icon)
+                        .font(.caption)
+                        .foregroundStyle(iconColor)
+                )
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.subheadline.weight(.medium))
+                Text(subtitle)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.leading)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
     }
 }
 
@@ -203,6 +315,7 @@ struct HomeView: View {
 struct HomeHeroView: View {
     let greetingText: String
     let opportunityCount: Int
+    let hasCards: Bool
     @Binding var showNotifications: Bool
     @Binding var showProfile: Bool
     var body: some View {
@@ -218,7 +331,11 @@ struct HomeHeroView: View {
                         .font(.largeTitle.weight(.bold))
                         .foregroundStyle(.white)
 
-                    if opportunityCount > 0 {
+                    if !hasCards {
+                        Text("Add your cards to start finding opportunities.")
+                            .font(.subheadline)
+                            .foregroundStyle(.white.opacity(0.6))
+                    } else if opportunityCount > 0 {
                         (Text("You have ")
                             .foregroundStyle(.white.opacity(0.6))
                         + Text("\(opportunityCount)")
@@ -710,6 +827,245 @@ struct ProfileView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+// MARK: - Zero Card Hero Card
+
+struct ZeroCardHeroCard: View {
+    var onAddCard: () -> Void
+    var onHowItWorks: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text("Add a card to get personalized recommendations")
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(.white)
+
+            Text("PerkBandit can compare rewards, track benefits, and remind you before value expires.")
+                .font(.caption)
+                .foregroundStyle(.white.opacity(0.5))
+                .lineLimit(3)
+
+            HStack(spacing: 12) {
+                Button(action: onAddCard) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.caption2)
+                        Text("Add a Card")
+                            .font(.caption.weight(.semibold))
+                    }
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(Capsule().fill(PBTheme.accent))
+                }
+
+                Button(action: onHowItWorks) {
+                    HStack(spacing: 2) {
+                        Text("See How It Works")
+                            .font(.caption.weight(.medium))
+                        Image(systemName: "chevron.right")
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(.white.opacity(0.6))
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color(red: 24/255, green: 30/255, blue: 52/255))
+        )
+    }
+}
+
+// MARK: - Add Card Sheet
+
+struct AddCardSheet: View {
+    @Environment(\.dismiss) private var dismiss
+    @EnvironmentObject var cardStore: CardStore
+    @State private var selectedCards: [String] = []
+
+    var body: some View {
+        NavigationStack {
+            ManualCardSetupView(selectedCards: $selectedCards) {
+                guard !selectedCards.isEmpty else {
+                    dismiss()
+                    return
+                }
+                let newCards: [UserCard] = selectedCards.compactMap { cardId in
+                    guard catalogCard(for: cardId) != nil else { return nil }
+                    return UserCard.fromCatalog(id: cardId)
+                }
+                cardStore.cards = newCards
+                cardStore.isUserSelected = true
+                cardStore.save()
+                dismiss()
+            }
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+}
+
+// MARK: - How It Works View
+
+struct HowItWorksView: View {
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    // Header
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("How PerkBandit Works")
+                            .font(.title2.weight(.bold))
+                        Text("Here's a preview of what you'll see once you add your cards.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
+
+                    // Sample opportunity
+                    sampleSection(
+                        title: "Smart Recommendations",
+                        icon: "creditcard.fill",
+                        iconColor: PBTheme.accent
+                    ) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            sampleBadge
+
+                            Text("Best Card for Dining")
+                                .font(.subheadline.weight(.bold))
+                            Text("PerkBandit analyzes your cards and tells you which one earns the most rewards for each purchase category.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+
+                    // Sample benefit tracking
+                    sampleSection(
+                        title: "Benefit Tracking",
+                        icon: "clock.arrow.circlepath",
+                        iconColor: .orange
+                    ) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            sampleBadge
+
+                            Text("$300 Travel Credit Expiring")
+                                .font(.subheadline.weight(.bold))
+                            Text("Get reminders before your statement credits and perks expire so you never leave money on the table.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            HStack(spacing: 4) {
+                                Image(systemName: "exclamationmark.triangle.fill")
+                                    .font(.caption2)
+                                    .foregroundStyle(.orange)
+                                Text("Expires in 45 days")
+                                    .font(.caption.weight(.medium))
+                                    .foregroundStyle(.orange)
+                            }
+                        }
+                    }
+
+                    // Sample welcome bonus
+                    sampleSection(
+                        title: "Welcome Bonus Progress",
+                        icon: "star.circle.fill",
+                        iconColor: PBTheme.accent
+                    ) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            sampleBadge
+
+                            Text("Chase Sapphire Preferred")
+                                .font(.subheadline.weight(.bold))
+                            Text("Track your spending toward welcome bonus requirements with real-time progress.")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+
+                            // Progress bar
+                            VStack(alignment: .leading, spacing: 4) {
+                                ZStack(alignment: .leading) {
+                                    Capsule()
+                                        .fill(Color(.systemGray5))
+                                        .frame(height: 6)
+                                    Capsule()
+                                        .fill(PBTheme.accent)
+                                        .frame(width: 150, height: 6)
+                                }
+
+                                Text("$3,000 / $4,000 spent")
+                                    .font(.caption2)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
+                }
+                .padding(20)
+            }
+            .background(Color(red: 245/255, green: 246/255, blue: 250/255))
+            .navigationTitle("How It Works")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        dismiss()
+                    } label: {
+                        Image(systemName: "xmark.circle.fill")
+                            .font(.title3)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+        }
+    }
+
+    private var sampleBadge: some View {
+        Text("SAMPLE")
+            .font(.system(size: 10, weight: .bold))
+            .foregroundStyle(PBTheme.accent)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(
+                Capsule().fill(PBTheme.accent.opacity(0.12))
+            )
+    }
+
+    private func sampleSection<Content: View>(
+        title: String,
+        icon: String,
+        iconColor: Color,
+        @ViewBuilder content: () -> Content
+    ) -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.subheadline)
+                    .foregroundStyle(iconColor)
+                Text(title)
+                    .font(.subheadline.weight(.semibold))
+            }
+
+            content()
+                .padding(14)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color(.systemBackground))
+                )
         }
     }
 }

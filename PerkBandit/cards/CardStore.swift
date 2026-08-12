@@ -12,6 +12,8 @@ class CardStore: ObservableObject {
     @Published var recommendationPrefs: Set<RecommendationPreference> = []
     @Published var pointValuation: String = "perkbandit"
 
+    var hasCards: Bool { isUserSelected }
+
     // Convenience: resolved catalog cards for views that only need display
     var creditCards: [CreditCard] {
         cards.compactMap { $0.definition }

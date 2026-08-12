@@ -13,6 +13,7 @@ struct CardSubPageDestination: Hashable {
 struct CardsTabView: View {
     @EnvironmentObject var cardStore: CardStore
     @State private var path = NavigationPath()
+    @State private var showAddCard = false
 
     var body: some View {
         NavigationStack(path: $path) {
@@ -34,31 +35,73 @@ struct CardsTabView: View {
 
                         Spacer()
 
-                        VStack(spacing: 4) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.title2)
-                                .foregroundStyle(.white, .black)
-                            Text("Add Card")
-                                .font(.caption)
-                                .foregroundStyle(.black)
+                        Button {
+                            showAddCard = true
+                        } label: {
+                            VStack(spacing: 4) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundStyle(.white, .black)
+                                Text("Add Card")
+                                    .font(.caption)
+                                    .foregroundStyle(.black)
+                            }
                         }
                     }
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
                     .padding(.bottom, 20)
 
-                    Spacer()
+                    if cardStore.hasCards {
+                        Spacer()
 
-                    // Card deck
-                    CardDeckView(cards: cardStore.cards) { userCardID in
-                        path.append(userCardID)
+                        // Card deck
+                        CardDeckView(cards: cardStore.cards) { userCardID in
+                            path.append(userCardID)
+                        }
+
+                        Spacer()
+                    } else {
+                        Spacer()
+
+                        VStack(spacing: 16) {
+                            Image(systemName: "creditcard.trianglebadge.exclamationmark")
+                                .font(.system(size: 48))
+                                .foregroundStyle(.gray)
+
+                            Text("No Cards Yet")
+                                .font(.title2.weight(.semibold))
+                                .foregroundStyle(.black)
+
+                            Text("Add your first card to start tracking benefits, rewards, and opportunities.")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal, 40)
+
+                            Button {
+                                showAddCard = true
+                            } label: {
+                                Text("Add a Card")
+                                    .font(.subheadline.weight(.semibold))
+                                    .foregroundStyle(.white)
+                                    .padding(.horizontal, 24)
+                                    .padding(.vertical, 10)
+                                    .background(Capsule().fill(PBTheme.accent))
+                            }
+                            .padding(.top, 8)
+                        }
+
+                        Spacer()
                     }
-
-                    Spacer()
                 }
             }
             .toolbar(.hidden, for: .navigationBar)
             .toolbar(.visible, for: .tabBar)
+            .sheet(isPresented: $showAddCard) {
+                AddCardSheet()
+                    .environmentObject(cardStore)
+            }
             .navigationDestination(for: String.self) { userCardID in
                 CardDetailView(userCardID: userCardID)
             }

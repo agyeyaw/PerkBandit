@@ -9,6 +9,7 @@ struct CardDetailView: View {
     let userCardID: String
     @EnvironmentObject var cardStore: CardStore
     @Environment(\.dismiss) private var dismiss
+    @State private var showDeleteConfirmation = false
 
     private var userCard: UserCard? {
         cardStore.cards.first { $0.id == userCardID }
@@ -89,10 +90,34 @@ struct CardDetailView: View {
                             .padding(.horizontal)
                         }
 
+                        // Remove Card
+                        Button(role: .destructive) {
+                            showDeleteConfirmation = true
+                        } label: {
+                            HStack(spacing: 6) {
+                                Image(systemName: "trash")
+                                Text("Remove Card")
+                            }
+                            .font(.subheadline.weight(.medium))
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 10)
+                        }
+                        .padding(.horizontal)
+
                         Spacer()
                     }
                 }
             }
+        }
+        .alert("Remove Card?", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Remove", role: .destructive) {
+                cardStore.removeCard(userCardID: userCardID)
+                dismiss()
+            }
+        } message: {
+            Text("This card and its tracked benefits will be removed.")
         }
         .navigationBarBackButtonHidden(true)
         .toolbar {

@@ -68,6 +68,19 @@ enum UserProfileService {
         }
     }
 
+    static func deleteCard(cardDefinitionID: String) async {
+        guard let user = Auth.auth().currentUser else { return }
+        do {
+            let docRef = Firestore.firestore().collection("users").document(user.uid)
+            let doc = try await docRef.getDocument()
+            guard var cardState = doc.data()?["cardState"] as? [[String: Any]] else { return }
+            cardState.removeAll { ($0["cardDefinitionID"] as? String) == cardDefinitionID }
+            try await docRef.setData(["cardState": cardState, "updatedAt": FieldValue.serverTimestamp()], merge: true)
+        } catch {
+            print("[UserProfileService] Card delete failed: \(error)")
+        }
+    }
+
     static func loadPreferences() async -> (prefs: Set<String>, valuation: String)? {
         guard let user = Auth.auth().currentUser else {
             print("[UserProfileService] No authenticated user — skipping Firestore read.")

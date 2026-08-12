@@ -116,6 +116,10 @@ struct HomeView: View {
                 .onTapGesture { selectedOpportunity = top }
                 .padding(.horizontal, 20)
                 .padding(.bottom, 12)
+        } else {
+            CardRecommendationCard(onViewCards: onViewCards)
+                .padding(.horizontal, 20)
+                .padding(.bottom, 12)
         }
 
         // White content area
@@ -179,10 +183,84 @@ struct HomeView: View {
                 RoundedRectangle(cornerRadius: 16, style: .continuous)
                     .fill(Color(.systemBackground))
             )
+
+            // Your Credits section
+            let allCredits: [(userCardID: String, cardName: String, state: UserBenefitState, credit: StatementCredit)] = cardStore.cards.flatMap { userCard -> [(String, String, UserBenefitState, StatementCredit)] in
+                guard let def = userCard.definition else { return [] }
+                return userCard.benefitStates.compactMap { state in
+                    guard state.status != .used,
+                          let credit = def.statementCredits.first(where: { $0.description == state.id })
+                    else { return nil }
+                    return (userCard.id, def.name, state, credit)
+                }
+            }
+
+            if !allCredits.isEmpty {
+                HStack {
+                    Text("Your Credits")
+                        .font(.title3.weight(.bold))
+                    Spacer()
+                    Text("\(allCredits.count) unused")
+                        .font(.caption.weight(.medium))
+                        .foregroundStyle(PBTheme.accent)
+                }
+
+                VStack(spacing: 0) {
+                    ForEach(Array(allCredits.enumerated()), id: \.element.state.id) { index, item in
+                        Button {
+                            cardStore.toggleBenefitStatus(
+                                userCardID: item.userCardID,
+                                benefitID: item.state.id
+                            )
+                        } label: {
+                            HStack(spacing: 12) {
+                                Circle()
+                                    .fill(Color.blue.opacity(0.12))
+                                    .frame(width: 36, height: 36)
+                                    .overlay(
+                                        Image(systemName: OpportunityEngine.iconForBenefit(item.credit.description))
+                                            .font(.caption)
+                                            .foregroundStyle(.blue)
+                                    )
+
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(item.credit.description)
+                                        .font(.subheadline.weight(.medium))
+                                    Text("\(item.cardName) · \(item.credit.frequency.label)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+
+                                Spacer()
+
+                                VStack(alignment: .trailing, spacing: 2) {
+                                    Text("$\(Int(item.credit.perPeriodAmount))")
+                                        .font(.subheadline.weight(.semibold))
+                                        .foregroundStyle(.green)
+                                    Text(item.state.status == .available ? "Available" : "Not Sure")
+                                        .font(.caption2.weight(.medium))
+                                        .foregroundStyle(item.state.status == .available ? .green : .orange)
+                                }
+                            }
+                            .padding(.horizontal, 14)
+                            .padding(.vertical, 12)
+                        }
+                        .buttonStyle(.plain)
+
+                        if index < allCredits.count - 1 {
+                            Divider().padding(.leading, 52)
+                        }
+                    }
+                }
+                .background(
+                    RoundedRectangle(cornerRadius: 16, style: .continuous)
+                        .fill(Color(.systemBackground))
+                )
+            }
         }
         .padding(.horizontal, 20)
         .padding(.top, 24)
-        .padding(.bottom, 40)
+        .padding(.bottom, 500)
         .background(
             VStack(spacing: 0) {
                 UnevenRoundedRectangle(
@@ -221,12 +299,9 @@ struct HomeView: View {
         .padding(.bottom, 12)
 
         // Zero-card hero card
-        ZeroCardHeroCard(
-            onAddCard: { showAddCard = true },
-            onHowItWorks: { showHowItWorks = true }
-        )
-        .padding(.horizontal, 20)
-        .padding(.bottom, 12)
+        CardRecommendationCard(onViewCards: { showAddCard = true })
+            .padding(.horizontal, 20)
+            .padding(.bottom, 12)
 
         // White content area — Get Started
         VStack(alignment: .leading, spacing: 20) {
@@ -263,7 +338,7 @@ struct HomeView: View {
         }
         .padding(.horizontal, 20)
         .padding(.top, 24)
-        .padding(.bottom, 40)
+        .padding(.bottom, 500)
         .background(
             VStack(spacing: 0) {
                 UnevenRoundedRectangle(
@@ -521,6 +596,36 @@ struct OpportunityHeroCard: View {
                         Text("Unclaimed credit expiring")
                             .font(.caption)
                             .foregroundStyle(.white.opacity(0.5))
+                    }
+                }
+            }
+
+            // Welcome bonus progress
+            if opportunity.type == .welcomeBonus, let progress = opportunity.progress {
+                VStack(alignment: .leading, spacing: 8) {
+                    ZStack(alignment: .leading) {
+                        Capsule()
+                            .fill(.white.opacity(0.15))
+                            .frame(height: 6)
+                        GeometryReader { geo in
+                            Capsule()
+                                .fill(PBTheme.accent)
+                                .frame(width: geo.size.width * progress, height: 6)
+                        }
+                        .frame(height: 6)
+                    }
+
+                    HStack {
+                        Text("\(Int(progress * 100))% complete")
+                            .font(.caption)
+                            .foregroundStyle(.white.opacity(0.6))
+                        Spacer()
+                        if let deadline = opportunity.expirationDate {
+                            let daysLeft = Calendar.current.dateComponents([.day], from: Date(), to: deadline).day ?? 0
+                            Text("\(daysLeft) days left")
+                                .font(.caption.weight(.medium))
+                                .foregroundStyle(daysLeft <= 7 ? .red : PBTheme.accent)
+                        }
                     }
                 }
             }
@@ -889,9 +994,13 @@ struct AddCardSheet: View {
     @EnvironmentObject var cardStore: CardStore
     @State private var selectedCards: [String] = []
 
+    private var alreadyOwnedCards: Set<String> {
+        Set(cardStore.cards.map { $0.cardDefinitionID })
+    }
+
     var body: some View {
         NavigationStack {
-            ManualCardSetupView(selectedCards: $selectedCards) {
+            ManualCardSetupView(selectedCards: $selectedCards, alreadyOwnedCards: alreadyOwnedCards) {
                 guard !selectedCards.isEmpty else {
                     dismiss()
                     return
@@ -900,7 +1009,9 @@ struct AddCardSheet: View {
                     guard catalogCard(for: cardId) != nil else { return nil }
                     return UserCard.fromCatalog(id: cardId)
                 }
-                cardStore.cards = newCards
+                let existingIDs = Set(cardStore.cards.map { $0.cardDefinitionID })
+                let uniqueNewCards = newCards.filter { !existingIDs.contains($0.cardDefinitionID) }
+                cardStore.cards.append(contentsOf: uniqueNewCards)
                 cardStore.isUserSelected = true
                 cardStore.save()
                 dismiss()
@@ -916,6 +1027,9 @@ struct AddCardSheet: View {
                     }
                 }
             }
+        }
+        .onAppear {
+            selectedCards = cardStore.cards.map { $0.cardDefinitionID }
         }
     }
 }

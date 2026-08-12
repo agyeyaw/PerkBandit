@@ -12,6 +12,7 @@ private let issuerFilters = ["All", "Chase", "Amex", "Capital One", "Citi", "Dis
 
 struct ManualCardSetupView: View {
     @Binding var selectedCards: [String]
+    var alreadyOwnedCards: Set<String> = []
     let onAdvance: () -> Void
 
     @State private var searchText = ""
@@ -93,10 +94,12 @@ struct ManualCardSetupView: View {
             // Card list
             List(filteredCards) { card in
                 Button {
-                    if selectedCards.contains(card.id) {
-                        selectedCards.removeAll { $0 == card.id }
-                    } else {
-                        selectedCards.append(card.id)
+                    if !alreadyOwnedCards.contains(card.id) {
+                        if selectedCards.contains(card.id) {
+                            selectedCards.removeAll { $0 == card.id }
+                        } else {
+                            selectedCards.append(card.id)
+                        }
                     }
                 } label: {
                     HStack {
@@ -104,7 +107,7 @@ struct ManualCardSetupView: View {
                             Text(card.name)
                                 .font(.system(size: 15, weight: .medium))
                                 .foregroundColor(.primary)
-                            Text(card.issuer)
+                            Text(alreadyOwnedCards.contains(card.id) ? "\(card.issuer) · Already added" : card.issuer)
                                 .font(.system(size: 13))
                                 .foregroundColor(.secondary)
                         }
@@ -113,6 +116,7 @@ struct ManualCardSetupView: View {
                             .font(.system(size: 20))
                             .foregroundColor(selectedCards.contains(card.id) ? navyColor : .secondary)
                     }
+                    .opacity(alreadyOwnedCards.contains(card.id) ? 0.5 : 1.0)
                 }
                 .listRowBackground(Color.white)
             }

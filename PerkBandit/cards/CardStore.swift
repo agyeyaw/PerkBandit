@@ -232,4 +232,14 @@ class CardStore: ObservableObject {
         }
         if changed { save() }
     }
+
+    // MARK: - Remove Card
+
+    func removeCard(userCardID: String) {
+        cards.removeAll { $0.id == userCardID }
+        if cards.isEmpty {
+            isUserSelected = false
+        }
+        save()
+    }
 }

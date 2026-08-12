@@ -244,7 +244,7 @@ struct HomeHeroView: View {
                     } label: {
                         ZStack(alignment: .topTrailing) {
                             Image(systemName: "bell")
-                                .font(.title3)
+                                .font(.system(size: 17))
                                 .foregroundStyle(.white.opacity(0.8))
                                 .padding(8)
 
@@ -259,7 +259,7 @@ struct HomeHeroView: View {
                         showProfile = true
                     } label: {
                         Image(systemName: "person.circle.fill")
-                            .font(.title2)
+                            .font(.system(size: 34))
                             .foregroundStyle(.white.opacity(0.8))
                             .padding(8)
                     }

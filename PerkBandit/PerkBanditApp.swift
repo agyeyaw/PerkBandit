@@ -35,9 +35,16 @@ struct PerkBanditApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
 
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
-    @StateObject private var cardStore = CardStore()
+    @StateObject private var catalogService: CardCatalogService
+    @StateObject private var cardStore: CardStore
     @StateObject private var authManager = AuthManager()
     @State private var screen: AppScreen = .splash
+
+    init() {
+        let catalog = CardCatalogService()
+        _catalogService = StateObject(wrappedValue: catalog)
+        _cardStore = StateObject(wrappedValue: CardStore(catalogService: catalog))
+    }
 
     var body: some Scene {
         WindowGroup {
@@ -82,8 +89,19 @@ struct PerkBanditApp: App {
                 }
             }
             .environmentObject(authManager)
+            .environmentObject(catalogService)
+            .task {
+                // Fetch on launch (falls back to embedded catalog if not authed yet)
+                await catalogService.fetchCatalog()
+                print("✅ Catalog fetched: \(catalogService.cards.count) cards")
+            }
             .onChange(of: authManager.isSignedIn) { _, newValue in
-                if !newValue {
+                if newValue {
+                    Task {
+                        await catalogService.fetchCatalog()
+                        print("✅ Catalog fetched: \(catalogService.cards.count) cards")
+                    }
+                } else {
                     hasCompletedOnboarding = false
                     screen = .splash
                 }

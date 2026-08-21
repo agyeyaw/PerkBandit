@@ -31,6 +31,12 @@ final class AuthManager: ObservableObject {
         if let handle { Auth.auth().removeStateDidChangeListener(handle) }
     }
 
+    // MARK: - Refresh
+
+    func refreshUser() {
+        self.user = Auth.auth().currentUser
+    }
+
     // MARK: - Email / Password
 
     func signUp(email: String, password: String) async {

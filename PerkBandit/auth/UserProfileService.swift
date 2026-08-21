@@ -7,7 +7,7 @@ import FirebaseAuth
 import FirebaseFirestore
 
 enum UserProfileService {
-    static func saveOnboardingData(_ state: OnboardingState) async {
+    static func saveOnboardingData(_ state: OnboardingState, authManager: AuthManager) async {
         guard let user = Auth.auth().currentUser else {
             print("[UserProfileService] No authenticated user — skipping Firestore write.")
             return
@@ -18,6 +18,7 @@ enum UserProfileService {
         changeRequest.displayName = state.userName
         do {
             try await changeRequest.commitChanges()
+            await MainActor.run { authManager.refreshUser() }
         } catch {
             print("[UserProfileService] Failed to update displayName: \(error.localizedDescription)")
         }

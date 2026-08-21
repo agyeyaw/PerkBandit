@@ -14,6 +14,7 @@ struct UserOnboardingFlowView: View {
     var onBack: (() -> Void)? = nil
 
     @EnvironmentObject var cardStore: CardStore
+    @EnvironmentObject var authManager: AuthManager
     @StateObject private var state = OnboardingState()
     @State private var stepStack: [UserOnboardingStep] = [.nameEntry]
 
@@ -40,6 +41,7 @@ struct UserOnboardingFlowView: View {
                 HStack {
                     Button(action: {
                         if stepStack.count <= 1 {
+                            OnboardingState.clearInProgressState()
                             onBack?()
                         } else {
                             goBack()
@@ -85,6 +87,11 @@ struct UserOnboardingFlowView: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .background(Color.white.ignoresSafeArea())
+        .onAppear {
+            if let restored = state.restoreInProgress() {
+                stepStack = restored
+            }
+        }
     }
 
     @ViewBuilder
@@ -149,6 +156,7 @@ struct UserOnboardingFlowView: View {
                 onChooseAnother: {
                     if let idx = stepStack.lastIndex(of: .setupMethod) {
                         withAnimation { stepStack = Array(stepStack.prefix(through: idx)) }
+                        state.saveInProgress(stepStack: stepStack)
                     } else {
                         goBack()
                     }
@@ -173,7 +181,6 @@ struct UserOnboardingFlowView: View {
 
         case .recommendationPrefs:
             RecommendationPrefsStepView(
-                selectedGoals: state.selectedGoals,
                 recommendationPrefs: $state.recommendationPrefs,
                 onAdvance: { advance(to: .notifications) },
                 onAdvanced: { advance(to: .pointValuation) }
@@ -219,9 +226,13 @@ struct UserOnboardingFlowView: View {
                     pointValuation: state.pointValuation
                 )
                 let capturedState = state
-                Task { await UserProfileService.saveOnboardingData(capturedState) }
-                cardStore.reload()
-                onFinished()
+                Task {
+                    await UserProfileService.saveOnboardingData(capturedState, authManager: authManager)
+                    await MainActor.run {
+                        cardStore.reload()
+                        onFinished()
+                    }
+                }
             })
         }
     }
@@ -236,10 +247,12 @@ struct UserOnboardingFlowView: View {
 
     private func advance(to step: UserOnboardingStep) {
         withAnimation { stepStack.append(step) }
+        state.saveInProgress(stepStack: stepStack)
     }
 
     private func goBack() {
         guard stepStack.count > 1 else { return }
         withAnimation { stepStack.removeLast() }
+        state.saveInProgress(stepStack: stepStack)
     }
 }

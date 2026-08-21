@@ -8,13 +8,13 @@
 import Foundation
 import Combine
 
-enum UserOnboardingStep {
+enum UserOnboardingStep: String, CaseIterable {
     case nameEntry, goals, setupMethod, manualCards, confirmCards, connectAccounts, demo
     case welcomeBonus, benefitStatus, recommendationPrefs, pointValuation
     case notifications, dataConfidence, firstValue, auth, completion
 }
 
-enum SetupMethod {
+enum SetupMethod: String {
     case manual, connect, demo
 }
 
@@ -45,6 +45,50 @@ class OnboardingState: ObservableObject {
 
     // Point valuation
     @Published var pointValuation: String = "perkbandit"           // "perkbandit" / "cashback" / "custom"
+
+    // MARK: - In-progress persistence keys
+    private static let kStepStack = "onboarding_stepStack"
+    private static let kUserName = "onboarding_userName"
+    private static let kSelectedGoals = "onboarding_selectedGoals"
+    private static let kSetupMethod = "onboarding_setupMethod"
+    private static let kSelectedCards = "onboarding_selectedCards"
+
+    /// Save current state to UserDefaults for resume-on-kill.
+    func saveInProgress(stepStack: [UserOnboardingStep]) {
+        let ud = UserDefaults.standard
+        ud.set(stepStack.map(\.rawValue), forKey: Self.kStepStack)
+        ud.set(userName, forKey: Self.kUserName)
+        ud.set(Array(selectedGoals), forKey: Self.kSelectedGoals)
+        ud.set(setupMethod?.rawValue, forKey: Self.kSetupMethod)
+        ud.set(selectedCards, forKey: Self.kSelectedCards)
+    }
+
+    /// Restore state saved by saveInProgress. Returns the step stack if available.
+    func restoreInProgress() -> [UserOnboardingStep]? {
+        let ud = UserDefaults.standard
+        guard let rawSteps = ud.stringArray(forKey: Self.kStepStack),
+              !rawSteps.isEmpty else { return nil }
+
+        let steps = rawSteps.compactMap(UserOnboardingStep.init(rawValue:))
+        guard !steps.isEmpty else { return nil }
+
+        userName = ud.string(forKey: Self.kUserName) ?? ""
+        selectedGoals = Set(ud.stringArray(forKey: Self.kSelectedGoals) ?? [])
+        if let raw = ud.string(forKey: Self.kSetupMethod) {
+            setupMethod = SetupMethod(rawValue: raw)
+        }
+        selectedCards = ud.stringArray(forKey: Self.kSelectedCards) ?? []
+
+        return steps
+    }
+
+    /// Remove all in-progress persistence keys.
+    static func clearInProgressState() {
+        let ud = UserDefaults.standard
+        for key in [kStepStack, kUserName, kSelectedGoals, kSetupMethod, kSelectedCards] {
+            ud.removeObject(forKey: key)
+        }
+    }
 }
 
 enum OnboardingPersistence {
@@ -103,6 +147,7 @@ enum OnboardingPersistence {
         recommendationPrefs: Set<String> = [],
         pointValuation: String = "perkbandit"
     ) {
+        OnboardingState.clearInProgressState()
         UserDefaults.standard.set(true, forKey: "hasCompletedOnboarding")
 
         // Save recommendation preferences to UserDefaults
@@ -149,6 +194,7 @@ enum OnboardingPersistence {
     }
     #if DEBUG
     static func reset() {
+        OnboardingState.clearInProgressState()
         UserDefaults.standard.removeObject(forKey: "hasCompletedOnboarding")
         UserDefaults.standard.removeObject(forKey: "userSelectedCardIDs")
         UserDefaults.standard.removeObject(forKey: "userCards")

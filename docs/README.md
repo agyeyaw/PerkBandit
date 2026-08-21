@@ -8,8 +8,6 @@ xe# PerkBandit
 
 Help people obtain the maximum value from every financial product they own. PerkBandit starts with credit cards and grows into a broader financial benefit platform.
 
-The app includes an raccoon mascot named **Scout** — a calm, intelligent copilot that tells you which card to use, which benefits are expiring, and how much value you've generated — all through natural conversation.
-
 ---
 
 ## Tech Stack
@@ -56,7 +54,7 @@ No additional environment variables are required to run the initial boilerplate.
 
 | Phase | Focus |
 |-------|-------|
-| **Phase 1** | Manual-First MVP — card catalog, portfolio, recommendations, benefits, Pilot AI, ROI, notifications, subscription |
+| **Phase 1** | Manual-First MVP — card catalog, portfolio, recommendations, benefits, AI assistant, ROI, notifications, subscription |
 | **Phase 2** | Limited Sync Beta — institution connections, transaction import, automated credit detection, welcome-bonus tracking |
 | **Phase 3** | Expanded Automation — more issuers, card-linked offers, household portfolios, annual card review |
 | **Phase 4** | Broader Platform — loyalty programs, subscription optimizer, banking benefits, travel rewards |

@@ -4,8 +4,6 @@
 
 PerkBandit is an AI-powered financial assistant. Its mission is to help people get maximum value from every financial product they own — starting with credit cards.
 
-The app includes an intelligent raccoon mascot named **Scout** that guides users toward better financial decisions through natural language interaction, daily briefings, and proactive benefit reminders.
-
 ## Tech Stack
 
 - **Language**: Swift
@@ -31,9 +29,9 @@ The app includes an intelligent raccoon mascot named **Scout** that guides users
 ## Folder Structure
 
 ```
-PerkScout/
+PerkBandit/
 ├── PerkBandit.xcodeproj/          # Xcode project file
-├── PerkScout/                    # Main app source
+├── PerkBandit/                    # Main app source
 │   ├── PerkBanditApp.swift        # App entry point
 │   ├── ContentView.swift         # Root view
 │   ├── Models/                   # Data models (Card, Benefit, Offer, Recommendation)
@@ -42,7 +40,6 @@ PerkScout/
 │   │   ├── Portfolio/
 │   │   ├── Recommendations/
 │   │   ├── Benefits/
-│   │   ├── Scout/                # AI assistant chat UI
 │   │   └── ROI/
 │   ├── Services/                 # Network, Supabase, Claude API
 │   ├── Engine/                   # Deterministic recommendation engine
@@ -73,15 +70,14 @@ PerkScout/
 
 | File | Purpose |
 |------|---------|
-| `PerkScout/PerkBanditApp.swift` | App entry point (`@main`) |
-| `PerkScout/ContentView.swift` | Root SwiftUI view |
+| `PerkBandit/PerkBanditApp.swift` | App entry point (`@main`) |
+| `PerkBandit/ContentView.swift` | Root SwiftUI view |
 | `docs/PRD.md` | Full product requirements document |
 | `TODO.md` | Phased implementation task list |
 
 
 ## Brand Identity
 - Product: PerkBandit
-- Mascot: Scout (Raccoon)
 
 ## Color Theme
 - Background #111827

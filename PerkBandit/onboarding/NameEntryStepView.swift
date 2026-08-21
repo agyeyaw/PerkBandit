@@ -43,6 +43,11 @@ struct NameEntryStepView: View {
                 )
                 .padding(.horizontal, 40)
                 .focused($isNameFocused)
+                .onChange(of: userName) { _, newValue in
+                    let filtered = newValue.filter { $0.isLetter || $0 == " " || $0 == "'" || $0 == "-" || $0 == "\u{2019}" }
+                    let capped = String(filtered.prefix(50))
+                    if capped != newValue { userName = capped }
+                }
                 .submitLabel(.done)
                 .onSubmit {
                     if !userName.trimmingCharacters(in: .whitespaces).isEmpty {

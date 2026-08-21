@@ -29,19 +29,12 @@ struct ContentView: View {
                 }
                 .tag(1)
 
-            InsightTabView(onRestartOnboarding: onBack)
+            InsightTabView()
                 .tabItem {
                     Image(systemName: "chart.bar.fill")
                     Text("Insight")
                 }
                 .tag(2)
-
-            AskTabView()
-                .tabItem {
-                    Image(systemName: "bubble.left.and.bubble.right.fill")
-                    Text("Ask")
-                }
-                .tag(3)
         }
         .tint(navy)
     }
@@ -49,5 +42,5 @@ struct ContentView: View {
 
 #Preview {
     ContentView { }
-        .environmentObject(CardStore())
+        .environmentObject(CardStore(catalogService: CardCatalogService()))
 }

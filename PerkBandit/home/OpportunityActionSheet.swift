@@ -72,6 +72,8 @@ struct OpportunityActionSheet: View {
                 welcomeBonusContent
             case .annualFeeReview:
                 annualFeeContent
+            case .needsConfirmation:
+                needsConfirmationContent
             case .cardRecommendation:
                 EmptyView()
             }
@@ -270,6 +272,52 @@ struct OpportunityActionSheet: View {
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
                     .background(Capsule().fill(Color(.systemGray3)))
+            }
+            .padding(.horizontal, 20)
+        }
+    }
+
+    // MARK: - Needs Confirmation
+
+    private var needsConfirmationContent: some View {
+        VStack(spacing: 16) {
+            HStack(spacing: 8) {
+                Image(systemName: "questionmark.circle.fill")
+                    .foregroundStyle(.orange)
+                Text("Confirm whether you've used this benefit")
+                    .font(.subheadline.weight(.medium))
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20)
+
+            HStack(spacing: 12) {
+                Button {
+                    if let ucID = opportunity.userCardID, let bID = opportunity.benefitID {
+                        cardStore.markBenefitUsed(userCardID: ucID, benefitID: bID)
+                    }
+                    dismiss()
+                } label: {
+                    Text("Yes, Used")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.white)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Capsule().fill(PBTheme.accent))
+                }
+
+                Button {
+                    if let ucID = opportunity.userCardID, let bID = opportunity.benefitID {
+                        cardStore.toggleBenefitStatus(userCardID: ucID, benefitID: bID)
+                    }
+                    dismiss()
+                } label: {
+                    Text("Not Used")
+                        .font(.body.weight(.semibold))
+                        .foregroundStyle(.primary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(Capsule().fill(Color(.systemGray5)))
+                }
             }
             .padding(.horizontal, 20)
         }

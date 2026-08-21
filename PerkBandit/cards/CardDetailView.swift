@@ -830,6 +830,6 @@ private struct MockCardValue {
 #Preview {
     NavigationStack {
         CardDetailView(userCardID: "preview")
-            .environmentObject(CardStore())
+            .environmentObject(CardStore(catalogService: CardCatalogService()))
     }
 }

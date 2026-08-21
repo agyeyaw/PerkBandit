@@ -114,6 +114,6 @@ struct HomeCardCarousel: View {
     ZStack {
         Color(red: 24/255, green: 32/255, blue: 51/255)
             .ignoresSafeArea()
-        HomeCardCarousel(cards: Array(cardCatalog.prefix(5)), selectedIndex: .constant(0))
+        HomeCardCarousel(cards: Array(embeddedCardCatalog.prefix(5)), selectedIndex: .constant(0))
     }
 }

@@ -27,6 +27,7 @@ enum OpportunityEngine {
         results += welcomeBonusOpportunities(cards: cards, now: now)
         results += activationOpportunities(cards: cards)
         results += annualFeeOpportunities(cards: cards, now: now)
+        results += needsConfirmationOpportunities(cards: cards)
         return results.sorted { ($0.type.priority, $0.urgency) < ($1.type.priority, $1.urgency) }
     }
 
@@ -212,6 +213,76 @@ enum OpportunityEngine {
         }
     }
 
+    // MARK: - Priority 5: Needs Confirmation
+
+    private static func needsConfirmationOpportunities(cards: [UserCard]) -> [Opportunity] {
+        cards.flatMap { userCard -> [Opportunity] in
+            guard let def = userCard.definition else { return [] }
+            return userCard.benefitStates.compactMap { state -> Opportunity? in
+                guard state.status == .notSure,
+                      let credit = def.statementCredits.first(where: { $0.description == state.id })
+                else { return nil }
+
+                return Opportunity(
+                    id: "confirm-\(userCard.id)-\(state.id)",
+                    type: .needsConfirmation,
+                    title: "\(credit.description) not confirmed",
+                    subtitle: "\(def.name) · Needs confirmation",
+                    estimatedValue: Decimal(credit.perPeriodAmount),
+                    urgency: .low,
+                    cardDefinitionID: userCard.cardDefinitionID,
+                    userCardID: userCard.id,
+                    explanation: "You marked your \(credit.description) on the \(def.name) as \"not sure\". Confirm whether you've used it so PerkBandit can give you accurate recommendations.",
+                    icon: iconForBenefit(credit.description),
+                    iconColor: "orange",
+                    expirationDate: state.periodEnd,
+                    confidence: .inferred,
+                    progress: nil,
+                    benefitID: state.id
+                )
+            }
+        }
+    }
+
+    // MARK: - Estimated Value Captured
+
+    static func estimatedValueCaptured(cards: [UserCard]) -> (thisYear: Decimal, thisMonth: Decimal)? {
+        let cal = Calendar.current
+        let now = Date()
+        let currentYear = cal.component(.year, from: now)
+        let currentMonth = cal.component(.month, from: now)
+
+        var yearTotal: Decimal = 0
+        var monthTotal: Decimal = 0
+
+        for userCard in cards {
+            guard let def = userCard.definition else { continue }
+            for state in userCard.benefitStates {
+                guard state.status == .used,
+                      let credit = def.statementCredits.first(where: { $0.description == state.id })
+                else { continue }
+
+                let amount = Decimal(credit.perPeriodAmount)
+                yearTotal += amount
+
+                // Count toward this month if the period end is in the current month
+                if let periodEnd = state.periodEnd {
+                    let endMonth = cal.component(.month, from: periodEnd)
+                    let endYear = cal.component(.year, from: periodEnd)
+                    if endYear == currentYear && endMonth == currentMonth {
+                        monthTotal += amount
+                    }
+                } else {
+                    // No period end — assume current month
+                    monthTotal += amount
+                }
+            }
+        }
+
+        guard yearTotal > 0 else { return nil }
+        return (thisYear: yearTotal, thisMonth: monthTotal)
+    }
+
     // MARK: - Best Card for Category
 
     struct CardRewardMatch: Identifiable {
@@ -382,6 +453,11 @@ enum OpportunityEngine {
         if lower.contains("streaming") || lower.contains("entertainment") || lower.contains("digital") { return "play.tv" }
         if lower.contains("saks") { return "bag.fill" }
         if lower.contains("airline") { return "airplane.departure" }
+        if lower.contains("dunkin") { return "cup.and.saucer.fill" }
+        if lower.contains("lululemon") { return "figure.run" }
+        if lower.contains("clear") { return "person.badge.shield.checkmark.fill" }
+        if lower.contains("walmart") { return "cart.fill" }
+        if lower.contains("resy") { return "fork.knife" }
         return "creditcard.fill"
     }
 }

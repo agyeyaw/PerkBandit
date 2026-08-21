@@ -4,8 +4,6 @@
 
 **Product Name:** PerkBandit
 
-**Mascot:** Scout (Raccoon)
-
 ### Brand Mission
 Help people uncover every reward, credit, perk, and benefit tied to the financial products they already own.
 
@@ -27,8 +25,6 @@ Help people uncover every reward, credit, perk, and benefit tied to the financia
 | Success | #A3E635 |
 | Primary Text | #F9FAFB |
 | Secondary Text | #9CA3AF |
-
-Scout is the face of the product and communicates recommendations in a friendly, encouraging tone. The deterministic rules engine performs all financial calculations.
 
 ---
 
@@ -459,115 +455,6 @@ A US credit card holder who:
 
 ---
 
-
-
-# 6.1 Scout AI Companion (Brand Differentiator)
-
-## Vision
-
-PerkBandit is more than a financial app—it includes an intelligent raccoon mascot named **Scout**.
-
-Scout is not a cartoon mascot. Scout is a resourceful reward hunter that guides users toward making better financial decisions while adding personality and emotional engagement to the product.
-
-The objective is to increase trust, retention, and daily engagement without using manipulative gamification.
-
-## Brand Personality
-
-Scout should feel:
-
-- Calm
-- Intelligent
-- Trustworthy
-- Encouraging
-- Proactive
-- Slightly witty
-- Professional
-
-Scout should never guilt users or pressure them into opening the app.
-
-## Product Role
-
-Scout becomes the primary interface for interacting with PerkBandit.
-
-Examples:
-
-- "Scout, what's the best card for Costco?"
-- "Scout, should I keep my Amex Platinum?"
-- "Scout, how much value have I generated this year?"
-- "Scout, what should I do today?"
-
-Rather than navigating menus, users should increasingly interact with Scout through natural language.
-
-## Daily Briefing
-
-The home screen should begin with a personalized briefing from Scout.
-
-Example:
-
-> Good afternoon.
-
-> Here's what's worth your attention today.
-
-• Use your Amex Gold for lunch.
-
-• Your Uber credit expires tomorrow.
-
-• You earned an estimated $12 yesterday.
-
-• No other action is needed today.
-
-The dashboard appears beneath this summary.
-
-## Emotional States
-
-Scout should communicate through subtle expressions and animations.
-
-Supported emotional states include:
-
-- Happy — celebrating rewards earned
-- Excited — welcome bonus completed
-- Proud — annual savings milestones
-- Focused — recommending the best card
-- Concerned — benefits nearing expiration
-- Surprised — identifying overlooked value
-
-These emotions should reinforce positive actions rather than create anxiety.
-
-## Notifications
-
-Notifications should feel personal and helpful.
-
-Example:
-
-"Don't forget—your dining credit expires tomorrow. I'd hate to see it go to waste."
-
-Avoid negative messaging such as broken streaks, guilt, or disappointment.
-
-## Achievements
-
-Celebrate meaningful financial milestones rather than arbitrary usage streaks.
-
-Examples:
-
-- First $1,000 earned in rewards
-- $500 recovered from credits
-- 90 days without missing a benefit
-- First welcome bonus completed
-
-Achievements should reinforce financial progress instead of app engagement.
-
-## Design Direction
-
-Scout should be represented as a minimalist raccoon mascot rather than an animal mascot.
-
-Possible visual directions:
-
-- Abstract compass
-- Radar pulse
-- Floating orb
-- Minimal pilot icon
-
-The visual identity should match PerkBandit's premium Midnight Slate design language and convey trust, intelligence, and guidance.
 
 
 # 7. MVP Scope

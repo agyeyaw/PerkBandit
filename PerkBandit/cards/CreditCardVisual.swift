@@ -63,7 +63,7 @@ struct CreditCardVisual: View {
 }
 
 #Preview {
-    CreditCardVisual(card: cardCatalog[0])
+    CreditCardVisual(card: embeddedCardCatalog[0])
         .frame(width: 300)
         .padding()
         .background(Color.black)

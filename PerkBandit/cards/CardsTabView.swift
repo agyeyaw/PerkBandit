@@ -314,5 +314,5 @@ private struct CardRowView: View {
 
 #Preview {
     CardsTabView()
-        .environmentObject(CardStore())
+        .environmentObject(CardStore(catalogService: CardCatalogService()))
 }

@@ -16,13 +16,6 @@ struct CompletionStepView: View {
         VStack(spacing: 0) {
             Spacer()
 
-            Image("ScoutLaunch")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 160)
-
-            Spacer().frame(height: 32)
-
             Text("Everything's Ready")
                 .font(.system(size: 28, weight: .bold))
                 .multilineTextAlignment(.center)

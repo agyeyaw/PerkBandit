@@ -23,6 +23,8 @@ class CardStore: ObservableObject {
         OpportunityEngine.generateOpportunities(cards: cards)
     }
 
+    private let catalogService: CardCatalogService
+
     private static let storageKey = "userCards"
     private static let legacyKey = "userSelectedCardIDs"
     private static let prefsKey = "recommendationPrefs"
@@ -32,7 +34,8 @@ class CardStore: ObservableObject {
         "citi-premier": "citi-strata-premier",
     ]
 
-    init() {
+    init(catalogService: CardCatalogService) {
+        self.catalogService = catalogService
         // Try loading new UserCard format first
         if let data = UserDefaults.standard.data(forKey: Self.storageKey),
            let saved = try? JSONDecoder().decode([UserCard].self, from: data),
@@ -62,7 +65,7 @@ class CardStore: ObservableObject {
         }
 
         if savedIDs.isEmpty {
-            cards = Array(cardCatalog.prefix(5)).map { UserCard.fromCatalog($0) }
+            cards = Array(catalogService.cards.prefix(5)).map { UserCard.fromCatalog($0) }
             isUserSelected = false
         } else {
             cards = savedIDs.compactMap { id in
@@ -112,7 +115,7 @@ class CardStore: ObservableObject {
             return UserCard.fromCatalog(id: id)
         }
         if mapped.isEmpty {
-            cards = Array(cardCatalog.prefix(5)).map { UserCard.fromCatalog($0) }
+            cards = Array(catalogService.cards.prefix(5)).map { UserCard.fromCatalog($0) }
             isUserSelected = false
         } else {
             cards = mapped

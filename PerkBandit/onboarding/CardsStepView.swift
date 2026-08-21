@@ -15,12 +15,13 @@ struct ManualCardSetupView: View {
     var alreadyOwnedCards: Set<String> = []
     let onAdvance: () -> Void
 
+    @EnvironmentObject var catalogService: CardCatalogService
     @State private var searchText = ""
     @State private var selectedIssuer = "All"
     @State private var showRequestSheet = false
 
     private var filteredCards: [CreditCard] {
-        cardCatalog.filter { card in
+        catalogService.cards.filter { card in
             let matchesIssuer = selectedIssuer == "All" || card.issuer == selectedIssuer
             let matchesSearch = searchText.isEmpty ||
                 card.name.localizedCaseInsensitiveContains(searchText) ||
@@ -121,6 +122,27 @@ struct ManualCardSetupView: View {
                 .listRowBackground(Color.white)
             }
             .listStyle(.plain)
+            .overlay {
+                if catalogService.isLoading && catalogService.cards.count == embeddedCardCatalog.count {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                        .padding(.top, 40)
+                } else if let error = catalogService.lastError, catalogService.cards.isEmpty {
+                    VStack(spacing: 12) {
+                        Text("Couldn't load cards")
+                            .font(.system(size: 15, weight: .medium))
+                        Text(error.localizedDescription)
+                            .font(.system(size: 13))
+                            .foregroundColor(.secondary)
+                            .multilineTextAlignment(.center)
+                        Button("Retry") {
+                            Task { await catalogService.fetchCatalog() }
+                        }
+                        .font(.system(size: 15, weight: .medium))
+                    }
+                    .padding()
+                }
+            }
 
             // Don't see your card?
             Button {

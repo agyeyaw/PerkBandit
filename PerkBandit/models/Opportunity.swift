@@ -22,6 +22,7 @@ enum OpportunityType: Equatable {
     case welcomeBonus
     case categoryActivation
     case annualFeeReview
+    case needsConfirmation
     case cardRecommendation
 
     var priority: Int {
@@ -30,7 +31,8 @@ enum OpportunityType: Equatable {
         case .welcomeBonus: return 2
         case .categoryActivation: return 3
         case .annualFeeReview: return 4
-        case .cardRecommendation: return 5
+        case .needsConfirmation: return 5
+        case .cardRecommendation: return 6
         }
     }
 }

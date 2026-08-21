@@ -5,23 +5,24 @@
 
 import SwiftUI
 
-struct CardColor: Hashable {
+struct CardColor: Hashable, Codable {
     let r: Double, g: Double, b: Double
     var color: Color { Color(red: r, green: g, blue: b) }
 }
 
-struct RewardRule: Hashable {
+struct RewardRule: Hashable, Codable {
     let category: String
     let multiplier: String
     let capDescription: String?
 }
 
 enum BenefitFrequency: String, Codable, Hashable {
-    case monthly, semiannual, annual, oneTime
+    case monthly, quarterly, semiannual, annual, oneTime
 
     var label: String {
         switch self {
         case .monthly: return "Monthly"
+        case .quarterly: return "Quarterly"
         case .semiannual: return "Semiannual"
         case .annual: return "Annual"
         case .oneTime: return "One-time"
@@ -31,6 +32,7 @@ enum BenefitFrequency: String, Codable, Hashable {
     var periodsPerYear: Int {
         switch self {
         case .monthly: return 12
+        case .quarterly: return 4
         case .semiannual: return 2
         case .annual: return 1
         case .oneTime: return 1
@@ -38,7 +40,7 @@ enum BenefitFrequency: String, Codable, Hashable {
     }
 }
 
-struct StatementCredit: Hashable {
+struct StatementCredit: Hashable, Codable {
     let description: String
     let amount: String
     let notes: String?
@@ -54,7 +56,7 @@ struct StatementCredit: Hashable {
     }
 }
 
-struct CreditCard: Identifiable, Hashable {
+struct CreditCard: Identifiable, Hashable, Codable {
     let id: String
     let name: String
     let issuer: String
@@ -91,10 +93,10 @@ private func stableLastFour(from id: String) -> String {
 }
 
 func catalogCard(for id: String) -> CreditCard? {
-    cardCatalog.first { $0.id == id }
+    cardCatalogIndex[id]
 }
 
-let cardCatalog: [CreditCard] = [
+let embeddedCardCatalog: [CreditCard] = [
     // MARK: - Chase
     CreditCard(
         id: "chase-sapphire-preferred",
@@ -226,6 +228,8 @@ let cardCatalog: [CreditCard] = [
         statementCredits: [
             StatementCredit(description: "Dining credit", amount: "$120/year", notes: "Up to $10/month at select restaurants", frequency: .monthly),
             StatementCredit(description: "Uber Cash", amount: "$120/year", notes: "Up to $10/month", frequency: .monthly),
+            StatementCredit(description: "Dunkin' credit", amount: "$84/year", notes: "Up to $7/month", frequency: .monthly),
+            StatementCredit(description: "Resy credit", amount: "$100/year", notes: "Up to $50 semiannually", frequency: .semiannual),
         ],
         activationRequired: nil,
         exclusions: ["Superstores (Walmart, Target) excluded from supermarket category"],
@@ -254,6 +258,10 @@ let cardCatalog: [CreditCard] = [
             StatementCredit(description: "Digital entertainment", amount: "$240/year", notes: "Up to $20/month", frequency: .monthly),
             StatementCredit(description: "Uber Cash", amount: "$200/year", notes: "$15/month + $20 December", frequency: .monthly),
             StatementCredit(description: "Saks Fifth Avenue", amount: "$100/year", notes: "Up to $50 semiannually", frequency: .semiannual),
+            StatementCredit(description: "Walmart+", amount: "$155/year", notes: "Monthly membership credit", frequency: .monthly),
+            StatementCredit(description: "CLEAR+", amount: "$189/year", notes: "Annual membership credit", frequency: .annual),
+            StatementCredit(description: "Resy credit", amount: "$400/year", notes: "Up to $100/quarter at Resy restaurants", frequency: .quarterly),
+            StatementCredit(description: "lululemon credit", amount: "$300/year", notes: "Up to $75/quarter", frequency: .quarterly),
         ],
         activationRequired: "Select airline for fee credit",
         exclusions: [],
@@ -665,3 +673,7 @@ let cardCatalog: [CreditCard] = [
         lastFour: stableLastFour(from: "bofa-unlimited-cash")
     ),
 ]
+
+var cardCatalogIndex: [String: CreditCard] = Dictionary(
+    uniqueKeysWithValues: embeddedCardCatalog.map { ($0.id, $0) }
+)

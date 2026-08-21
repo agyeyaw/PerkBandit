@@ -44,14 +44,6 @@ struct AuthView: View {
                 .padding(.top, 12)
             }
 
-            // Logo
-            Image("AppLogo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 60, height: 60)
-                .padding(.top, 48)
-                .padding(.bottom, 20)
-
             // Title
             Text(isLoginMode ? "Log in to your account" : "Create your account")
                 .font(.system(size: 24, weight: .bold))

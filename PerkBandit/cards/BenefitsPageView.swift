@@ -174,6 +174,6 @@ struct BenefitsPageView: View {
 #Preview {
     NavigationStack {
         BenefitsPageView(cardDefinitionID: "amex-platinum")
-            .environmentObject(CardStore())
+            .environmentObject(CardStore(catalogService: CardCatalogService()))
     }
 }

@@ -28,7 +28,7 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
-enum AppScreen { case splash, onboarding, userOnboarding, auth, main }
+enum AppScreen: String, CaseIterable { case splash, onboarding, userOnboarding, auth, main }
 
 @main
 struct PerkBanditApp: App {
@@ -38,7 +38,7 @@ struct PerkBanditApp: App {
     @StateObject private var catalogService: CardCatalogService
     @StateObject private var cardStore: CardStore
     @StateObject private var authManager = AuthManager()
-    @State private var screen: AppScreen = .splash
+    @AppStorage("appScreen") private var screen: AppScreen = .splash
 
     init() {
         let catalog = CardCatalogService()
@@ -102,6 +102,7 @@ struct PerkBanditApp: App {
                         print("✅ Catalog fetched: \(catalogService.cards.count) cards")
                     }
                 } else {
+                    OnboardingState.clearInProgressState()
                     hasCompletedOnboarding = false
                     screen = .splash
                 }

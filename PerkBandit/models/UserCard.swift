@@ -50,6 +50,13 @@ struct UserBenefitState: Codable, Identifiable {
             let start = cal.date(from: cal.dateComponents([.year, .month], from: date))!
             let end = cal.date(byAdding: DateComponents(month: 1, day: -1), to: start)!
             return (start, end)
+        case .quarterly:
+            let month = cal.component(.month, from: date)
+            let year = cal.component(.year, from: date)
+            let qStart = ((month - 1) / 3) * 3 + 1  // 1, 4, 7, or 10
+            let start = cal.date(from: DateComponents(year: year, month: qStart, day: 1))!
+            let end = cal.date(byAdding: DateComponents(month: 3, day: -1), to: start)!
+            return (start, end)
         case .semiannual:
             let month = cal.component(.month, from: date)
             let year = cal.component(.year, from: date)
@@ -103,7 +110,7 @@ struct WelcomeBonus: Codable {
 // The user's personal copy of a card
 struct UserCard: Identifiable, Codable {
     let id: String                     // unique per user-card instance (UUID string)
-    let cardDefinitionID: String       // FK → CreditCard.id in cardCatalog
+    let cardDefinitionID: String       // FK → CreditCard.id in card catalog
     var trackingMode: TrackingMode
 
     var dateAdded: Date

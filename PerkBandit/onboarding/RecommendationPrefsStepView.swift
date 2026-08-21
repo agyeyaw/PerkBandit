@@ -15,21 +15,10 @@ private let recommendationOptions = [
     "Keep recommendations simple",
 ]
 
-// Maps goal strings → recommendation pref to pre-select
-private let goalToRecMapping: [String: String] = [
-    "Earn more cashback": "Maximize cashback",
-    "Maximize travel rewards": "Maximize travel points",
-    "Complete welcome bonuses": "Prioritize welcome bonuses",
-    "Track benefits": "Use credits before they expire",
-]
-
 struct RecommendationPrefsStepView: View {
-    let selectedGoals: Set<String>
     @Binding var recommendationPrefs: Set<String>
     let onAdvance: () -> Void
     let onAdvanced: () -> Void
-
-    @State private var hasAppliedDefaults = false
 
     var body: some View {
         VStack(spacing: 0) {
@@ -82,15 +71,6 @@ struct RecommendationPrefsStepView: View {
             }
             .padding(.top, 10)
             .padding(.bottom, 20)
-        }
-        .onAppear {
-            guard !hasAppliedDefaults else { return }
-            hasAppliedDefaults = true
-            for (goal, pref) in goalToRecMapping {
-                if selectedGoals.contains(goal) {
-                    recommendationPrefs.insert(pref)
-                }
-            }
         }
     }
 

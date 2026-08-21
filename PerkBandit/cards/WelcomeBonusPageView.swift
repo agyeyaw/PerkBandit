@@ -310,7 +310,7 @@ struct WelcomeBonusPageView: View {
 
 // MARK: - Update Spend Sheet
 
-private struct UpdateSpendSheet: View {
+struct UpdateSpendSheet: View {
     let currentSpend: Double
     let userCardID: String
     @EnvironmentObject var cardStore: CardStore
@@ -382,7 +382,7 @@ private struct UpdateSpendSheet: View {
 
 // MARK: - Start Tracking Sheet
 
-private struct StartTrackingSheet: View {
+struct StartTrackingSheet: View {
     let cardName: String
     let userCardID: String
     @EnvironmentObject var cardStore: CardStore
@@ -486,6 +486,6 @@ private struct StartTrackingSheet: View {
 #Preview {
     NavigationStack {
         WelcomeBonusPageView(cardDefinitionID: "amex-gold")
-            .environmentObject(CardStore())
+            .environmentObject(CardStore(catalogService: CardCatalogService()))
     }
 }

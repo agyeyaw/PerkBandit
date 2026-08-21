@@ -10,39 +10,32 @@ import SwiftUI
 private let navyColor = Color(red: 24/255, green: 32/255, blue: 51/255)
 
 struct OnboardingPage {
-    let imageName: String
     let title: String
     let description: String
 }
 
 private let pages: [OnboardingPage] = [
     OnboardingPage(
-        imageName: "AppLogo",
         title: "Welcome to PerkBandit",
         description: "Never miss another reward, credit, or perk. PerkBandit helps you uncover the hidden value in every card."
     ),
     OnboardingPage(
-        imageName: "OnboardingCredit",
         title: "Never miss another credit",
         description: "PerkBandit keeps track of every benefit so you don't leave money on the table."
     ),
     OnboardingPage(
-        imageName: "OnboardingCards",
         title: "Always know the best card to use",
         description: "Earn more points, cashback, and perks with every purchase."
     ),
     OnboardingPage(
-        imageName: "OnboardingScout",
         title: "PerkBandit tells you what to do— not just what you own",
         description: "Get simple, personalized recommendations based on your cards, spending, and available benefits."
     ),
     OnboardingPage(
-        imageName: "OnboardingValue",
         title: "See how much value you've earned",
         description: "Track the rewards, credit, and savings you've unlocked with PerkBandit."
     ),
     OnboardingPage(
-        imageName: "AppLogo",
         title: "Your Data, Your Control",
         description: "Start manually today and connect accounts whenever you're ready."
     ),
@@ -63,11 +56,6 @@ struct OnboardingView: View {
             TabView(selection: $currentPage) {
                 ForEach(pages.indices, id: \.self) { i in
                     VStack(spacing: 16) {
-                        Spacer()
-                        Image(pages[i].imageName)
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 80, height: 80)
                         Spacer()
                         Text(pages[i].title)
                             .font(.system(size: 22, weight: .bold))

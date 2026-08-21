@@ -27,7 +27,7 @@ struct WelcomeBonusStepView: View {
                     .padding(.top, 8)
 
                     ForEach(selectedCards, id: \.self) { cardId in
-                        if let card = cardCatalog.first(where: { $0.id == cardId }) {
+                        if let card = catalogCard(for: cardId) {
                             BonusCardSection(
                                 card: card,
                                 status: Binding(

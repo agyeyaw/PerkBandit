@@ -36,10 +36,10 @@
 - [ ] Redemption instructions detail view
 - [ ] Calendar view of upcoming expirations
 
-### Scout Assistant
+### AI Assistant
 - [ ] Claude API integration (structured tool calling)
-- [ ] Scout chat UI
-- [ ] Scout daily briefing on Home screen
+- [ ] AI chat UI
+- [ ] AI daily briefing on Home screen
 - [ ] Context injection: user's portfolio, benefits, recommendations
 - [ ] Guardrails: AI must reference rules engine output, not invent figures
 - [ ] Source + timestamp display on every AI response
@@ -117,11 +117,6 @@
 - [ ] Sentry error tracking integration
 - [ ] PostHog analytics (activation, engagement, reliability metrics)
 
-
-### Scout Brand Experience
-- [ ] Build Scout mascot
-- [ ] Add Scout Home greeting
-- [ ] Add Scout onboarding
 
 ### Design System
 - [ ] Implement Midnight Slate palette
